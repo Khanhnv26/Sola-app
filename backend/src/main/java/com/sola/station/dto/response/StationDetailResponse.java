@@ -1,0 +1,32 @@
+package com.sola.station.dto.response;
+import com.sola.catalog.dto.response.StationSourceResponse;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.List;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StationDetailResponse {
+
+    private UUID id;
+    private String slug;
+    private String name;
+    private String description;
+    private String moodTag;
+    private int defaultFocusMinutes;
+    private Integer defaultSleepMinutes;
+    private String themeKey;
+    private boolean featured;
+    private String ownerDisplayName;
+    private String primarySourceTitle;
+    private long playCount;
+    private List<AmbientLayerResponse> ambientLayers;
+    private List<StationSourceResponse> sources;
+}
