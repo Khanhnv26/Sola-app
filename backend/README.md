@@ -8,8 +8,8 @@ Hiện dự án đã dựng sẵn `pom.xml`, cấu hình `application.properties
 ## Bước 0: Hạ tầng dùng chung (`com.sola.common`)
 
 - [ ] Tạo `ErrorCode` (enum chứa `HttpStatus` + `message` tiếng Việt mặc định: `SUCCESS`, `VALIDATION_ERROR`, `NOT_FOUND`, `STATION_NOT_FOUND`, `INTERNAL_ERROR`).
-- [ ] Tạo `ApiResponse<T>` (record gồm `status`, `code`, `message`, `data`, `timestamp`) theo chuẩn mục 7 của `../docs/sola-architecture-spec.md`.
-- [ ] Tạo `PageResponse<T>` (record gồm `content`, `page`, `size`, `totalElements`, `totalPages`, `last`).
+- [ ] Tạo `ApiResponse<T>` (class DTO gồm `status`, `code`, `message`, `data`, `timestamp`) theo chuẩn mục 7 của `../docs/sola-architecture-spec.md`.
+- [ ] Tạo `PageResponse<T>` (class DTO gồm `content`, `page`, `size`, `totalElements`, `totalPages`, `last`).
 - [ ] Tạo `AppException` kế thừa `RuntimeException` mang theo `ErrorCode`.
 - [ ] Tạo `GlobalExceptionHandler` (`@RestControllerAdvice`) bắt:
   - `AppException`

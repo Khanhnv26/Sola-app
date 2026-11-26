@@ -1,31 +1,41 @@
 package com.sola.station;
 
 import com.sola.catalog.ContentSource;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
-public record StationSourceResponse(
-        UUID id,
-        String title,
-        String sourceType,
-        String streamFormat,
-        String sourceUrl,
-        String coverImageUrl,
-        String healthStatus,
-        int priorityOrder
-) {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StationSourceResponse {
+
+    private UUID id;
+    private String title;
+    private String sourceType;
+    private String streamFormat;
+    private String sourceUrl;
+    private String coverImageUrl;
+    private String healthStatus;
+    private int priorityOrder;
 
     public static StationSourceResponse from(StationSource link) {
         ContentSource s = link.getSource();
-        return new StationSourceResponse(
-                s.getId(),
-                s.getTitle(),
-                s.getSourceType(),
-                s.getStreamFormat(),
-                s.getSourceUrl(),
-                s.getCoverImageUrl(),
-                s.getHealthStatus(),
-                link.getPriorityOrder()
-        );
+        return StationSourceResponse.builder()
+                .id(s.getId())
+                .title(s.getTitle())
+                .sourceType(s.getSourceType())
+                .streamFormat(s.getStreamFormat())
+                .sourceUrl(s.getSourceUrl())
+                .coverImageUrl(s.getCoverImageUrl())
+                .healthStatus(s.getHealthStatus())
+                .priorityOrder(link.getPriorityOrder())
+                .build();
     }
 }

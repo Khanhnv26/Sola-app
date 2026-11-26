@@ -1,26 +1,36 @@
 package com.sola.common;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public record PageResponse<T>(
-        List<T> content,
-        int page,
-        int size,
-        long totalElements,
-        int totalPages,
-        boolean last
-) {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageResponse<T> {
+
+    private List<T> content;
+    private int page;
+    private int size;
+    private long totalElements;
+    private int totalPages;
+    private boolean last;
 
     public static <T> PageResponse<T> from(Page<?> page, List<T> content) {
-        return new PageResponse<>(
-                content,
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.isLast()
-        );
+        return PageResponse.<T>builder()
+                .content(content)
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .last(page.isLast())
+                .build();
     }
 }

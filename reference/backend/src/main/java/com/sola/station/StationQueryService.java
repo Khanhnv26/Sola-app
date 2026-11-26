@@ -68,7 +68,7 @@ public class StationQueryService {
         List<UUID> ids = List.of(station.getId());
         List<AmbientLayerResponse> layers = loadLayersByStationId(ids).getOrDefault(station.getId(), List.of());
         List<StationSourceResponse> sources = loadSourcesByStationId(ids).getOrDefault(station.getId(), List.of());
-        String primarySourceTitle = sources.isEmpty() ? null : sources.get(0).title();
+        String primarySourceTitle = sources.isEmpty() ? null : sources.get(0).getTitle();
 
         return new StationDetailResponse(
                 station.getId(),
@@ -138,7 +138,7 @@ public class StationQueryService {
                 .map(station -> {
                     List<AmbientLayerResponse> layers = layersMap.getOrDefault(station.getId(), List.of());
                     List<StationSourceResponse> sources = sourcesMap.getOrDefault(station.getId(), List.of());
-                    String primarySourceTitle = sources.isEmpty() ? null : sources.get(0).title();
+                    String primarySourceTitle = sources.isEmpty() ? null : sources.get(0).getTitle();
                     return new StationSummaryResponse(
                             station.getId(),
                             station.getSlug(),

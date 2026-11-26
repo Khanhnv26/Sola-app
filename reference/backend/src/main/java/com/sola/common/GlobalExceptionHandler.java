@@ -47,8 +47,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ApiResponse<Void>> handleHandlerMethodValidation(HandlerMethodValidationException ex) {
-        String message = ex.getAllValidationResults().stream()
-                .flatMap(r -> r.getResolvableErrors().stream())
+        String message = ex.getAllErrors().stream()
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("; "));
         return ResponseEntity

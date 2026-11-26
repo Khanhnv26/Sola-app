@@ -20,7 +20,7 @@
 
 | File trong `reference/backend/` | Điểm cần đối soát khi bạn tự code ở `backend/` |
 | :--- | :--- |
-| `common/ApiResponse.java` | Khung JSON phản hồi thống nhất (`status`, `code`, `message`, `data`, `timestamp`) bằng Java `record`. |
+| `common/ApiResponse.java` | Khung JSON phản hồi thống nhất (`status`, `code`, `message`, `data`, `timestamp`) bằng `class` DTO chuẩn. |
 | `common/PageResponse.java` | Bọc dữ liệu phân trang (`content`, `page`, `size`, `totalElements`, `totalPages`, `last`), không trả thẳng `Page` của Spring ra ngoài. |
 | `common/GlobalExceptionHandler.java` | Bắt tập trung `AppException`, lỗi validate bean + tham số query (`HandlerMethodValidationException` của Spring Boot 3.2+ / Spring 6.1+), `404 NoResourceFoundException`, và `500` không lộ stack trace ra JSON. |
 | `common/CorsConfig.java` | Cấu hình CORS cho `/api/**` nhận nguồn từ `application.properties`. |
@@ -30,7 +30,7 @@
 | `station/MoodStationRepository.java` | Dùng `@EntityGraph(attributePaths = "owner")` lấy luôn người tạo kênh, tránh N+1 khi truy cập `station.getOwner().getDisplayName()` khi `spring.jpa.open-in-view: false`. |
 | `station/StationQueryService.java` | **Chống N+1 bằng truy vấn theo lô:** gom toàn bộ `stationIds`, chỉ bắn 1 query lấy `layers` và 1 query lấy `sources` rồi ghép bằng `Map<UUID, List<...>>`. Ngân sách query: `/featured` `<= 3` câu SQL `SELECT`, `/discover` `<= 4` câu SQL `SELECT`. Dùng `Specification` cho bộ lọc động. |
 | `station/PublicStationController.java` | Validate `@Min(0)` cho `page`, `@Min(1) @Max(50)` cho `size` bằng `@Validated`. |
-| `station/StationSummaryResponse.java` & `StationDetailResponse.java` | Tách biệt hoàn toàn DTO (`record`) và Entity — không trả Entity ra Controller. |
+| `station/StationSummaryResponse.java` & `StationDetailResponse.java` | Tách biệt hoàn toàn DTO (`class`) và Entity — không trả Entity ra Controller. |
 
 ---
 

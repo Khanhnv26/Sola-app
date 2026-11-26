@@ -1,20 +1,31 @@
 package com.sola.station;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.UUID;
 
-public record AmbientSoundResponse(
-        UUID id,
-        String code,
-        String name,
-        String audioUrl
-) {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AmbientSoundResponse {
+
+    private UUID id;
+    private String code;
+    private String name;
+    private String audioUrl;
 
     public static AmbientSoundResponse from(AmbientSound sound) {
-        return new AmbientSoundResponse(
-                sound.getId(),
-                sound.getCode(),
-                sound.getName(),
-                sound.getAudioUrl()
-        );
+        return AmbientSoundResponse.builder()
+                .id(sound.getId())
+                .code(sound.getCode())
+                .name(sound.getName())
+                .audioUrl(sound.getAudioUrl())
+                .build();
     }
 }
