@@ -1,0 +1,17 @@
+# Dependencies & Build
+node_modules/
+dist/
+target/
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDEs & OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

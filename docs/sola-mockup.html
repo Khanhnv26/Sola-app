@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sola · Góc nghe Radio &amp; Podcast</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @layer base {
+      html {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+      }
+    }
+
+    /* Scoped Light (Warm Cream + White + Charcoal + Gold) & Dark (Graphite + Smoked Glass + Gold) tokens */
+    #appRoot[data-theme="light"] {
+      --shell-bg: #F4F1EA;
+      --card-bg: #FFFFFF;
+      --subcard-bg: #F8F6F1;
+      --glass-chrome: rgba(255, 255, 255, 0.78);
+      --glass-chrome-bot: rgba(255, 255, 255, 0.58);
+      --ink-primary: #1E1F24;
+      --ink-secondary: #5C5F66;
+      --ink-muted: #7C7F87;
+      --ink-on-dark: #FFFFFF;
+      --dark-pill: #1E1F24;
+      --gold-accent: #F5C428;
+      --gold-soft-bg: #FEF3C7;
+      --gold-text: #854D0E;
+      --border-soft: rgba(30, 31, 36, 0.08);
+      --glass-rim: rgba(255, 255, 255, 0.94);
+      --card-shadow: 0 4px 20px rgba(30, 31, 36, 0.04);
+      --orb-alpha: 0.22;
+    }
+
+    #appRoot[data-theme="dark"] {
+      --shell-bg: #111217;
+      --card-bg: #1A1C23;
+      --subcard-bg: #22252E;
+      --glass-chrome: rgba(34, 37, 46, 0.76);
+      --glass-chrome-bot: rgba(24, 26, 34, 0.62);
+      --ink-primary: #F8FAFC;
+      --ink-secondary: #A1A5B2;
+      --ink-muted: #7C8190;
+      --ink-on-dark: #111217;
+      --dark-pill: #F8FAFC;
+      --gold-accent: #FACC15;
+      --gold-soft-bg: rgba(250, 204, 21, 0.16);
+      --gold-text: #FDE047;
+      --border-soft: rgba(255, 255, 255, 0.09);
+      --glass-rim: rgba(255, 255, 255, 0.20);
+      --card-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+      --orb-alpha: 0.18;
+    }
+
+    #appRoot {
+      background-color: var(--shell-bg);
+      color: var(--ink-primary);
+      --status-ok: #10B981;
+      --status-warn: #EA580C;
+      --status-err: #F43F5E;
+      transition: background-color 260ms ease, color 260ms ease;
+    }
+
+    .app-shell {
+      background-color: transparent;
+      transition: background-color 260ms ease;
+    }
+
+    .bento-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--card-shadow);
+      transition: background-color 260ms ease, border-color 200ms ease, transform 200ms ease;
+    }
+
+    .sub-tile {
+      background-color: var(--subcard-bg);
+      border: 1px solid var(--border-soft);
+      transition: background-color 260ms ease, border-color 200ms ease;
+    }
+
+    /* Web approximation of Apple Liquid Glass applied selectively to floating nav chrome & dock */
+    .liquid-chrome {
+      position: relative;
+      isolation: isolate;
+      background: linear-gradient(155deg, var(--glass-chrome), var(--glass-chrome-bot));
+      border: 1px solid var(--glass-rim);
+      backdrop-filter: blur(24px) saturate(185%);
+      -webkit-backdrop-filter: blur(24px) saturate(185%);
+      box-shadow:
+        inset 0 1px 0 var(--glass-rim),
+        0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .charcoal-pill {
+      background-color: var(--dark-pill);
+      color: var(--ink-on-dark);
+    }
+
+    .gold-pill {
+      background-color: var(--gold-accent);
+      color: #1A1B1F;
+    }
+
+    .tactile:active {
+      transform: scale(0.975);
+    }
+
+    .focus-ring:focus-visible {
+      outline: 2px solid var(--gold-accent);
+      outline-offset: 2px;
+    }
+
+    input[type="range"].mini-range {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--border-soft);
+      cursor: pointer;
+    }
+    input[type="range"].mini-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--gold-accent);
+      border: 2px solid var(--dark-pill);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .liquid-chrome {
+        background: var(--card-bg) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bento-card, .sub-tile, .app-shell, #appRoot {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div id="appRoot" data-theme="light" class="relative overflow-x-hidden w-full max-w-full min-h-[100dvh] flex flex-col">
+    <!-- Subtle Warm Ambient Glow -->
+    <div aria-hidden="true" class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl" style="opacity: var(--orb-alpha); background: radial-gradient(circle, #F5C428, transparent 70%);"></div>
+      <div class="absolute bottom-0 right-1/5 w-[380px] h-[380px] rounded-full blur-3xl" style="opacity: var(--orb-alpha); background: radial-gradient(circle, #F59E0B, transparent 72%);"></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SHELL 1: PUBLIC SHELL (Landing "/" and Login "/login")    -->
+    <!-- Edge-to-Edge 100% fullscreen, minimal top header          -->
+    <!-- ========================================================= -->
+    <div id="publicShell" class="relative z-10 w-full min-h-[100dvh]">
+      <div class="app-shell w-full min-h-[100dvh] px-4 sm:px-7 lg:px-10 py-5 lg:py-6 flex flex-col justify-between gap-6">
+        <!-- Minimal Public Top Header -->
+        <header class="flex items-center justify-between gap-4">
+          <button type="button" data-nav="landing" class="cursor-pointer focus-ring flex items-center gap-2.5 rounded-full pr-2">
+            <span class="w-9 h-9 rounded-full charcoal-pill flex items-center justify-center shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12" />
+              </svg>
+            </span>
+            <span class="text-sm font-semibold tracking-tight" style="color: var(--ink-primary);">Sola</span>
+          </button>
+
+          <div class="flex items-center gap-2.5">
+            <div class="liquid-chrome rounded-full p-1 inline-flex items-center gap-1" role="group" aria-label="Chuyen Light va Dark Mode">
+              <button type="button" data-theme-btn="light" aria-label="Che do sang" class="theme-pill cursor-pointer focus-ring w-7 h-7 rounded-full flex items-center justify-center transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+                </svg>
+              </button>
+              <button type="button" data-theme-btn="dark" aria-label="Che do toi" class="theme-pill cursor-pointer focus-ring w-7 h-7 rounded-full flex items-center justify-center transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                </svg>
+              </button>
+            </div>
+
+            <button id="pubHeaderActionBtn" type="button" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-4 h-9 text-xs font-semibold hover:opacity-90 whitespace-nowrap">
+              Đăng nhập
+            </button>
+          </div>
+        </header>
+
+        <!-- PUBLIC VIEW 1: LANDING PAGE ("/") -->
+        <section id="view-landing" class="flex-1">
+          <div class="min-h-[calc(100dvh-116px)] flex flex-col justify-between gap-5">
+            <!-- Layer 1: 12-Col Hero + Interactive Live Station Mosaic -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+              <article class="bento-card rounded-[24px] p-6 sm:p-8 lg:p-10 lg:col-span-6 flex flex-col justify-between gap-6">
+                <div class="space-y-4">
+                  <span class="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-semibold" style="background: var(--gold-soft-bg); color: var(--gold-text);">
+                    Sola · Góc nghe Radio &amp; Podcast
+                  </span>
+                <h1 class="max-w-xl text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.1]" style="color: var(--ink-primary);">
+                  Không gian radio êm dịu
+                  <br />
+                  cho giờ tập trung mỗi ngày.
+                </h1>
+                <p class="max-w-md text-sm sm:text-base leading-relaxed" style="color: var(--ink-secondary);">
+                  Nghe đài trực tiếp, lưu các kênh podcast yêu thích và tự phối âm thanh thiên nhiên trong một không gian gọn nhẹ.
+                </p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="button" id="landingTryGuestBtn" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-6 py-3 text-sm font-semibold hover:opacity-90 whitespace-nowrap">
+                    Nghe thử miễn phí
+                  </button>
+                  <button type="button" id="landingLoginBtn" class="gold-pill tactile cursor-pointer focus-ring rounded-full px-6 py-3 text-sm font-semibold hover:opacity-90 whitespace-nowrap">
+                    Đăng nhập tài khoản
+                  </button>
+                </div>
+
+                <!-- Mini Interactive Audio Preview Bar inside Hero -->
+                <div class="sub-tile rounded-2xl p-3 flex items-center justify-between gap-3">
+                  <button id="landingPreviewPlayBtn" type="button" aria-label="Nghe thu am thanh" class="charcoal-pill tactile cursor-pointer focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0">
+                    <svg id="landingPlaySvg" width="13" height="13" viewBox="0 0 24 24" fill="var(--gold-accent)" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+                  </button>
+                  <div class="min-w-0 flex-1">
+                    <div id="landingPreviewTitle" class="text-xs font-semibold truncate" style="color: var(--ink-primary);">Nghe thử: Solar Morning</div>
+                    <div class="text-xs truncate" style="color: var(--ink-muted);">Bấm để nghe trực tiếp âm thanh thư giãn</div>
+                  </div>
+                  <canvas id="landingWaveCanvas" class="w-24 h-7 shrink-0" aria-label="Sóng âm nghe thử"></canvas>
+                </div>
+              </div>
+            </article>
+
+            <!-- Right 6 Cols: Featured Dark Audio Stage + 2 Quick Station Tiles -->
+            <div class="lg:col-span-6 flex flex-col gap-4">
+              <article class="rounded-[24px] p-6 flex-1 flex flex-col justify-between gap-5 relative overflow-hidden" style="background: linear-gradient(145deg, #1E1F24 0%, #262934 62%, #4A3D17 100%); color: #FFFFFF; box-shadow: var(--card-shadow);">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full" style="background: rgba(255,255,255,0.12);">
+                    <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+                    Đài phát tuyển chọn
+                  </span>
+                  <span class="gold-pill rounded-full px-2.5 py-0.5 text-xs font-semibold">Ổn định</span>
+                </div>
+
+                <div class="space-y-1">
+                  <div id="landingStageTitle" class="text-2xl font-semibold tracking-tight">Solar Morning</div>
+                  <p id="landingStageSub" class="text-xs opacity-80">Chillhop FM · Tiếng mưa 40% · Quán cafe 18% · Nhạc nền ấm 26%</p>
+                </div>
+
+                <div class="rounded-2xl p-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);">
+                  <canvas id="landingStageCanvas" class="w-full h-20 block" aria-label="Sóng âm sân khấu"></canvas>
+                </div>
+              </article>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bento-card rounded-2xl p-4 flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full gold-pill">TẬP TRUNG SÂU</span>
+                    <h2 class="text-sm font-semibold mt-1.5 truncate" style="color: var(--ink-primary);">Golden Rain</h2>
+                    <p class="text-xs truncate" style="color: var(--ink-muted);">Lofi Beats · 50 phút</p>
+                  </div>
+                  <button type="button" data-quick-launch="rainy" class="charcoal-pill tactile cursor-pointer focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" aria-label="Nghe thu Golden Rain">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--gold-accent)" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+                  </button>
+                </div>
+                <div class="bento-card rounded-2xl p-4 flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full gold-pill">PODCAST</span>
+                    <h2 class="text-sm font-semibold mt-1.5 truncate" style="color: var(--ink-primary);">Bright Study</h2>
+                    <p class="text-xs truncate" style="color: var(--ink-muted);">The Present Writer · Quán cafe</p>
+                  </div>
+                  <button type="button" data-quick-launch="reading" class="charcoal-pill tactile cursor-pointer focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0" aria-label="Nghe thu Bright Study">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--gold-accent)" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Layer 2: 4 Core Bento Capabilities -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <article class="bento-card rounded-2xl p-4 space-y-2.5">
+              <span class="w-9 h-9 rounded-xl charcoal-pill flex items-center justify-center" style="color: var(--gold-accent);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M19.1 4.9c3.9 3.9 3.9 10.2 0 14.1"/><circle cx="12" cy="12" r="2"/></svg>
+              </span>
+              <h2 class="text-sm font-semibold" style="color: var(--ink-primary);">Đài Radio Trực Tiếp</h2>
+              <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">Thưởng thức các kênh Lo-fi, Jazz, Acoustic êm dịu phát ổn định suốt ngày dài.</p>
+            </article>
+            <article class="bento-card rounded-2xl p-4 space-y-2.5">
+              <span class="w-9 h-9 rounded-xl sub-tile flex items-center justify-center" style="color: var(--ink-primary);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+              </span>
+              <h2 class="text-sm font-semibold" style="color: var(--ink-primary);">Podcast Nhớ Đoạn Nghe</h2>
+              <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">Gom các tập yêu thích vào chung danh sách và tự động phát tiếp đúng phút đang nghe dở.</p>
+            </article>
+            <article class="bento-card rounded-2xl p-4 space-y-2.5">
+              <span class="w-9 h-9 rounded-xl sub-tile flex items-center justify-center" style="color: var(--ink-primary);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M6 7v10M18 7v10"/></svg>
+              </span>
+              <h2 class="text-sm font-semibold" style="color: var(--ink-primary);">Trộn Âm Thanh Nền</h2>
+              <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">Tự phối tiếng mưa rơi, không khí quán cafe và nhạc nền êm dịu theo sở thích riêng.</p>
+            </article>
+            <article class="bento-card rounded-2xl p-4 space-y-2.5">
+              <span class="w-9 h-9 rounded-xl gold-pill flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </span>
+              <h2 class="text-sm font-semibold" style="color: var(--ink-primary);">Đồng Hồ Tập Trung</h2>
+              <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">Nhắc giờ 25 hoặc 50 phút, tự nhỏ dần khi đi ngủ và lưu thói quen mỗi ngày.</p>
+            </article>
+          </div>
+
+          <!-- Layer 3: Compact Footer Strip -->
+          <footer class="sub-tile rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span style="color: var(--ink-secondary);">Nghe thử ngay không cần tài khoản · Đăng nhập để lưu kênh riêng và nghe tiếp trên thiết bị khác.</span>
+            <div class="flex items-center gap-4 font-semibold">
+              <button type="button" data-nav="studio" class="cursor-pointer focus-ring hover:opacity-80" style="color: var(--ink-primary);">Mở Phòng Nghe</button>
+              <button type="button" data-nav="login" class="cursor-pointer focus-ring hover:opacity-80" style="color: var(--gold-text);">Đăng nhập</button>
+            </div>
+          </footer>
+        </div>
+      </section>
+
+      <!-- PUBLIC VIEW 2: LOGIN & REGISTER PAGE ("/login") -->
+      <section id="view-login" class="hidden flex-1">
+        <div class="min-h-[calc(100dvh-116px)] grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          <!-- Left 5 Cols: Rich Atmospheric Brand Showcase -->
+          <aside class="lg:col-span-5 rounded-[24px] p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-6 relative overflow-hidden" style="background: linear-gradient(155deg, #1E1F24 0%, #262934 62%, #4A3D17 100%); color: #FFFFFF; box-shadow: var(--card-shadow);">
+            <div class="space-y-4">
+              <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold" style="background: rgba(250, 204, 21, 0.16); color: #FDE047;">
+                Sola · Không gian nghe cá nhân
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight leading-snug">
+                Giữ trọn nhịp tập trung
+                <br />
+                trên mọi thiết bị.
+              </h2>
+              <ul class="space-y-3 text-xs sm:text-sm opacity-90 pt-2">
+                <li class="flex items-start gap-2.5">
+                  <span class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background: #F5C428;"></span>
+                  <span>Giữ nguyên các kênh bạn vừa nghe thử khi chuyển sang tài khoản cá nhân.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <span class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background: #F5C428;"></span>
+                  <span>Lưu không giới hạn danh sách phát và kênh radio, podcast yêu thích.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <span class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background: #F5C428;"></span>
+                  <span>Xem lại thói quen tập trung 7 ngày qua và tổng thời gian mỗi tuần.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="rounded-2xl p-4 space-y-2.5" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold">Solar Morning · Nghe thử</span>
+                <span class="opacity-75">Sẵn sàng lưu lại</span>
+              </div>
+              <canvas id="loginWaveCanvas" class="w-full h-10 block" aria-label="Sóng âm trang đăng nhập"></canvas>
+            </div>
+          </aside>
+
+          <!-- Right 7 Cols: Auth Form (Login/Register tabs) + Role Quick Tester -->
+          <div class="lg:col-span-7 bento-card rounded-[24px] p-6 sm:p-8 flex flex-col justify-between gap-6">
+            <div class="space-y-5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 id="authHeading" class="text-2xl font-semibold" style="color: var(--ink-primary);">Đăng nhập tài khoản</h1>
+                  <p class="text-xs mt-1" style="color: var(--ink-secondary);">Lưu kênh riêng, thống kê thói quen và nghe tiếp ở mọi nơi.</p>
+                </div>
+
+                <!-- Login / Register Tab Switcher -->
+                <div class="sub-tile rounded-full p-1 inline-flex items-center gap-1 text-xs">
+                  <button type="button" data-auth-tab="login" class="auth-tab-btn cursor-pointer focus-ring rounded-full px-3.5 py-1.5 font-semibold charcoal-pill">Đăng nhập</button>
+                  <button type="button" data-auth-tab="register" class="auth-tab-btn cursor-pointer focus-ring rounded-full px-3.5 py-1.5 font-medium" style="color: var(--ink-secondary);">Đăng ký</button>
+                </div>
+              </div>
+
+              <div class="sub-tile rounded-2xl p-3 text-xs flex items-center justify-between gap-2">
+                <span style="color: var(--ink-secondary);">Các kênh và đoạn podcast bạn vừa nghe sẽ được lưu lại ngay sau bước này.</span>
+                <span class="gold-pill rounded-full px-2.5 py-0.5 font-semibold shrink-0">Tự động lưu</span>
+              </div>
+
+              <form id="loginForm" class="space-y-3.5">
+                <div id="registerNameWrap" class="hidden">
+                  <label for="registerName" class="block text-xs font-medium mb-1" style="color: var(--ink-primary);">Tên hiển thị</label>
+                  <input id="registerName" type="text" placeholder="VD: Minh Nguyễn" class="focus-ring w-full rounded-xl px-3.5 py-2.5 text-sm" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                </div>
+                <div>
+                  <label for="loginEmail" class="block text-xs font-medium mb-1" style="color: var(--ink-primary);">Email</label>
+                  <input id="loginEmail" type="email" required value="minh.nguyen@example.com" class="focus-ring w-full rounded-xl px-3.5 py-2.5 text-sm" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                </div>
+                <div>
+                  <label for="loginPass" class="block text-xs font-medium mb-1" style="color: var(--ink-primary);">Mật khẩu</label>
+                  <input id="loginPass" type="password" required value="••••••••" class="focus-ring w-full rounded-xl px-3.5 py-2.5 text-sm" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                </div>
+                <div class="flex flex-wrap gap-2.5 pt-1">
+                  <button id="authSubmitBtn" type="submit" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-6 py-2.5 text-xs font-semibold">Đăng nhập</button>
+                  <button type="button" id="continueGuestBtn" class="tactile cursor-pointer focus-ring rounded-full px-4 py-2.5 text-xs font-medium" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);">Nghe thử tiếp</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Compact 3-Column Role Quick Switcher -->
+            <div class="pt-4 space-y-2.5" style="border-top: 1px solid var(--border-soft);">
+              <div class="text-xs font-semibold" style="color: var(--ink-muted);">Hoặc chọn nhanh vai trò để trải nghiệm thử:</div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button type="button" data-demo-role="GUEST" class="sub-tile tactile cursor-pointer focus-ring rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-between">
+                  <span style="color: var(--ink-primary);">Khách</span>
+                  <span style="color: var(--ink-muted);">Nghe thử</span>
+                </button>
+                <button type="button" data-demo-role="USER" class="sub-tile tactile cursor-pointer focus-ring rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-between">
+                  <span style="color: var(--ink-primary);">Thành viên</span>
+                  <span class="gold-pill rounded-full px-2 py-0.5">Cá nhân</span>
+                </button>
+                <button type="button" data-demo-role="ADMIN" class="sub-tile tactile cursor-pointer focus-ring rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-between">
+                  <span style="color: var(--ink-primary);">Quản lý</span>
+                  <span class="charcoal-pill rounded-full px-2 py-0.5">Quản trị</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SHELL 2: APP WORKSPACE SHELL (Studio / Discover / Dash / Admin) -->
+    <!-- Edge-to-Edge 100% fullscreen                              -->
+    <!-- ========================================================= -->
+    <div id="appShell" class="hidden relative z-10 w-full min-h-[100dvh]">
+      <div class="app-shell w-full min-h-[100dvh] px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col lg:flex-row gap-4 sm:gap-5">
+      <!-- ROLE-AWARE LEFT VERTICAL LIQUID GLASS ICON RAIL -->
+      <aside aria-label="Dieu huong ung dung" class="flex lg:flex-col items-center justify-between gap-3 shrink-0 relative">
+        <div class="flex lg:flex-col items-center gap-3">
+          <!-- Brand Mark -> Back to Landing -->
+          <button type="button" data-nav="landing" title="Trang chủ Sola" aria-label="Trang chu Sola" class="tactile focus-ring cursor-pointer flex flex-col items-center gap-1 p-1.5 rounded-2xl">
+            <span class="w-10 h-10 rounded-2xl charcoal-pill flex items-center justify-center shadow-sm">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12" />
+              </svg>
+            </span>
+            <span class="text-xs font-semibold tracking-tight hidden lg:block" style="color: var(--ink-primary);">Sola</span>
+          </button>
+
+          <!-- Main Role-Filtered Navigation Icons -->
+          <nav class="liquid-chrome rounded-full p-1.5 flex lg:flex-col items-center gap-1.5">
+            <button type="button" data-nav="studio" aria-label="Phong nghe nhac" title="Phòng nghe" class="rail-btn tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors"></button>
+            <button type="button" data-nav="discover" aria-label="Kham pha dai va podcast" title="Khám phá" class="rail-btn tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors"></button>
+            <div id="railDashboardWrap" class="hidden">
+              <button id="railDashboardBtn" type="button" data-nav="dashboard" aria-label="Goc ca nhan" title="Góc cá nhân" class="rail-btn tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors"></button>
+            </div>
+            <div id="railAdminWrap" class="hidden">
+              <button id="railAdminBtn" type="button" data-nav="admin" aria-label="Quan ly kenh phat" title="Quản lý kênh" class="rail-btn tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors"></button>
+            </div>
+          </nav>
+
+          <!-- Zen Mode Quick Pill -->
+          <div class="liquid-chrome rounded-full p-1.5 hidden sm:flex lg:flex-col items-center gap-1.5">
+            <button id="railZenBtn" type="button" aria-label="Che do tinh lang" title="Chế độ tĩnh lặng" class="tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center hover:opacity-80" style="color: var(--ink-secondary);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Avatar & Quick Account Popover -->
+        <div class="relative">
+          <div class="liquid-chrome rounded-full p-1.5 flex lg:flex-col items-center">
+            <button id="avatarMenuBtn" type="button" aria-label="Menu tai khoan" title="Tài khoản / Đổi vai trò" class="tactile focus-ring cursor-pointer w-10 h-10 rounded-full flex items-center justify-center font-semibold text-xs" style="background: var(--gold-soft-bg); color: var(--gold-text);">
+              K
+            </button>
+          </div>
+
+          <div id="avatarPopover" class="hidden absolute left-0 lg:left-14 bottom-12 lg:bottom-0 w-52 bento-card rounded-2xl p-2.5 space-y-1.5 z-50">
+            <div class="px-2 py-1 text-xs font-semibold" id="popoverRoleTitle" style="color: var(--ink-primary);">Khách nghe thử</div>
+            <button type="button" data-pop-role="GUEST" class="w-full text-left rounded-xl px-2.5 py-1.5 text-xs hover:opacity-80 cursor-pointer" style="background: var(--subcard-bg); color: var(--ink-primary);">Dùng thử (Khách)</button>
+            <button type="button" data-pop-role="USER" class="w-full text-left rounded-xl px-2.5 py-1.5 text-xs hover:opacity-80 cursor-pointer" style="background: var(--subcard-bg); color: var(--ink-primary);">Tài khoản Minh (Thành viên)</button>
+            <button type="button" data-pop-role="ADMIN" class="w-full text-left rounded-xl px-2.5 py-1.5 text-xs hover:opacity-80 cursor-pointer" style="background: var(--subcard-bg); color: var(--ink-primary);">Tài khoản Quản lý</button>
+            <div class="pt-1 mt-1" style="border-top: 1px solid var(--border-soft);">
+              <button type="button" data-nav="landing" class="w-full text-left rounded-xl px-2.5 py-1.5 text-xs cursor-pointer" style="color: var(--ink-secondary);">Về trang giới thiệu</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT CONTENT WORKSPACE -->
+      <div class="flex-1 min-w-0 flex flex-col gap-4">
+        <!-- CONSISTENT MINIMAL TOP HEADER -->
+        <header class="flex flex-wrap items-center justify-between gap-3">
+          <div id="pageTitleGroup" class="min-w-0 flex-1">
+            <h1 id="pageHeaderTitle" class="text-lg sm:text-xl font-semibold tracking-tight truncate" style="color: var(--ink-primary);">Phòng nghe</h1>
+            <p id="pageHeaderSub" class="text-xs truncate" style="color: var(--ink-muted);">Bật chút nhạc nhẹ, giữ trọn nhịp làm việc của bạn</p>
+          </div>
+
+          <div class="flex items-center gap-2.5 shrink-0">
+            <div class="liquid-chrome rounded-full p-1 inline-flex items-center gap-1" role="group" aria-label="Chuyen Light va Dark Mode">
+              <button type="button" data-theme-btn="light" aria-label="Che do sang" class="theme-pill cursor-pointer focus-ring w-7 h-7 rounded-full flex items-center justify-center transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+                </svg>
+              </button>
+              <button type="button" data-theme-btn="dark" aria-label="Che do toi" class="theme-pill cursor-pointer focus-ring w-7 h-7 rounded-full flex items-center justify-center transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                </svg>
+              </button>
+            </div>
+
+            <button id="topCtaBtn" type="button" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-4 h-10 text-xs font-semibold hover:opacity-90 whitespace-nowrap">
+              Đăng nhập
+            </button>
+          </div>
+        </header>
+
+        <!-- APP VIEW 1: STUDIO COCKPIT ("/studio") -->
+        <section id="view-studio" class="flex-1">
+          <div class="min-h-[calc(100dvh-100px)] flex flex-col gap-4">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <article class="bento-card rounded-[24px] p-5 lg:col-span-8 flex flex-col justify-between gap-4">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h1 id="studioGreeting" class="text-xl sm:text-2xl font-semibold tracking-tight" style="color: var(--ink-primary);">Xin chào, Bạn</h1>
+                  <p class="text-xs sm:text-sm mt-0.5" style="color: var(--ink-secondary);">Hôm nay bạn muốn tập trung cùng kênh nào?</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button id="autoResumeChip" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-full px-3.5 py-1.5 text-xs font-medium" style="color: var(--ink-primary);">Nghe tiếp tập cũ</button>
+                  <button id="quickGoalChip" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-full px-3.5 py-1.5 text-xs font-medium" style="color: var(--ink-primary);">+ Tập trung 25p</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                <div class="sub-tile rounded-2xl p-3 md:col-span-8 flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center" style="background: linear-gradient(135deg, #1E1F24, #3B3D47); color: var(--gold-accent);">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                      </svg>
+                    </div>
+                    <div class="min-w-0">
+                      <div id="heroTrackTitle" class="text-xs sm:text-sm font-semibold truncate" style="color: var(--ink-primary);">Solar Morning</div>
+                      <div id="heroTrackSub" class="text-xs truncate" style="color: var(--ink-muted);">Chillhop Live FM</div>
+                    </div>
+                  </div>
+
+                  <canvas id="stripWaveCanvas" class="hidden sm:block w-28 md:w-36 h-8 shrink-0" aria-label="Sóng âm"></canvas>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span id="stripTimerTxt" class="text-xs font-mono tabular-nums" style="color: var(--ink-secondary);">25:00</span>
+                    <button id="stripPlayBtn" type="button" aria-label="Phat hoac tam dung" class="charcoal-pill tactile cursor-pointer focus-ring w-9 h-9 rounded-full flex items-center justify-center">
+                      <svg id="stripPlaySvg" width="13" height="13" viewBox="0 0 24 24" fill="var(--gold-accent)" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <button id="prevStationBtn" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-2xl p-3 md:col-span-2 flex flex-col items-center justify-center gap-1 hover:opacity-85">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="color: var(--ink-primary);" aria-hidden="true"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+                  <span class="text-xs font-medium" style="color: var(--ink-secondary);">Kênh trước</span>
+                </button>
+                <button id="recommendStationBtn" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-2xl p-3 md:col-span-2 flex flex-col items-center justify-center gap-1 hover:opacity-85">
+                  <span class="w-4 h-4 rounded-full gold-pill inline-block"></span>
+                  <span class="text-xs font-medium" style="color: var(--ink-secondary);">Đổi gợi ý</span>
+                </button>
+              </div>
+            </article>
+
+            <article class="bento-card rounded-[24px] p-5 lg:col-span-4 flex flex-col justify-between gap-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-semibold" style="color: var(--ink-primary);">Tháng 11, 2026</h2>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background: var(--gold-soft-bg); color: var(--gold-text);">6 ngày liền</span>
+              </div>
+              <div id="weekCalendarStrip" class="grid grid-cols-7 gap-1 text-center"></div>
+              <div class="sub-tile rounded-2xl px-3 py-2.5 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-2 h-2 rounded-full shrink-0" style="background: var(--gold-accent);"></span>
+                  <div class="min-w-0">
+                    <div class="text-xs font-semibold truncate" style="color: var(--ink-primary);">Giờ tập trung</div>
+                    <div id="calendarTimerInfo" class="text-xs font-mono" style="color: var(--ink-muted);">25:00 · Sẵn sàng</div>
+                  </div>
+                </div>
+                <button id="calendarTimerBtn" type="button" class="gold-pill tactile cursor-pointer focus-ring rounded-full px-3 py-1 text-xs font-semibold shrink-0">Đếm giờ</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <div class="lg:col-span-8 flex flex-col gap-4">
+              <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+                <article class="bento-card rounded-[24px] p-5 md:col-span-7 flex flex-col gap-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <div>
+                      <h2 id="spotlightTitle" class="text-base font-semibold" style="color: var(--ink-primary);">Solar Morning</h2>
+                      <p id="spotlightDesc" class="text-xs" style="color: var(--ink-muted);">Lo-fi sáng rõ kết hợp tiếng mưa dịu nhẹ</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <button type="button" data-timer-opt="25" class="timer-opt-btn cursor-pointer focus-ring rounded-full px-2.5 py-1 text-xs font-semibold charcoal-pill">25p</button>
+                      <button type="button" data-timer-opt="50" class="timer-opt-btn cursor-pointer focus-ring rounded-full px-2.5 py-1 text-xs font-medium sub-tile" style="color: var(--ink-secondary);">50p</button>
+                    </div>
+                  </div>
+
+                  <div class="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="sm:col-span-7 rounded-2xl p-4 min-h-[156px] flex flex-col justify-between relative overflow-hidden" style="background: linear-gradient(135deg, #1E1F24 0%, #2C2F3A 60%, #4A3D17 100%); color: #FFFFFF;">
+                      <div class="flex items-center justify-between text-xs">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full" style="background: rgba(255,255,255,0.14);">
+                          <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                          ĐANG PHÁT
+                        </span>
+                        <span class="opacity-80">Tín hiệu tốt</span>
+                      </div>
+                      <canvas id="spotlightWaveCanvas" class="w-full h-16 block" aria-label="Sóng âm đài phát"></canvas>
+                    </div>
+
+                    <div class="sm:col-span-5 flex flex-col justify-center gap-2.5">
+                      <div>
+                        <div class="text-sm font-semibold" style="color: var(--ink-primary);">Thời gian còn lại</div>
+                        <div id="spotlightCountdown" class="text-2xl font-semibold font-mono tabular-nums" style="color: var(--ink-primary);">25:00</div>
+                        <div class="text-xs" style="color: var(--ink-muted);">3 lớp âm thanh nền</div>
+                      </div>
+                      <button id="spotlightZenBtn" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-xl px-3 py-2 text-xs font-medium text-left hover:opacity-85" style="color: var(--ink-primary);">
+                        Chế độ tĩnh lặng
+                      </button>
+                      <button id="spotlightSleepBtn" type="button" class="sub-tile tactile cursor-pointer focus-ring rounded-xl px-3 py-2 text-xs font-medium text-left hover:opacity-85" style="color: var(--ink-primary);">
+                        Hẹn tắt êm (30p)
+                      </button>
+                    </div>
+                  </div>
+                </article>
+
+                <div id="ambientStackBox" class="md:col-span-5 flex flex-col gap-3"></div>
+              </div>
+
+              <div id="studioBottomEpisodes" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <article class="bento-card rounded-[24px] p-5 lg:col-span-4 flex flex-col gap-3">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Danh sách kênh</h2>
+                <select id="boardModeSelect" aria-label="Loc danh sach dai" class="sub-tile focus-ring rounded-full px-3 py-1 text-xs font-medium cursor-pointer" style="color: var(--ink-primary);">
+                  <option value="stations">Kênh nhạc nền</option>
+                  <option value="queue">Tập Podcast</option>
+                </select>
+              </div>
+              <div id="rightBoardList" class="space-y-2.5 flex-1 lg:max-h-[325px] overflow-y-auto pr-1"></div>
+              <div class="pt-2 flex items-center justify-between text-xs" style="border-top: 1px solid var(--border-soft);">
+                <span style="color: var(--ink-muted);">Chọn nhanh trong Phòng nghe</span>
+                <button type="button" data-nav="discover" class="cursor-pointer focus-ring font-semibold hover:opacity-80" style="color: var(--gold-text);">Xem tất cả</button>
+              </div>
+            </article>
+          </div>
+          </div>
+        </section>
+
+        <!-- APP VIEW 2: DISCOVERY ("/discover") -->
+        <section id="view-discover" class="hidden flex-1">
+          <div class="pb-24 space-y-4">
+            <div class="bento-card rounded-[24px] p-5 sm:p-6 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-lg font-semibold" style="color: var(--ink-primary);">Khám phá Kênh Nhạc &amp; Cộng đồng</h2>
+                  <p class="text-xs" style="color: var(--ink-secondary);">Các kênh tuyển chọn sẵn và kênh do cộng đồng chia sẻ</p>
+                </div>
+                <span id="discoverCountBadge" class="sub-tile rounded-full px-3.5 py-1.5 text-xs font-semibold" style="color: var(--ink-secondary);">6 kênh phù hợp</span>
+              </div>
+
+              <!-- In-Page Contextual Search & Filter Bar -->
+              <div class="sub-tile rounded-2xl p-2.5 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+                <div class="rounded-full px-3.5 h-10 flex items-center gap-2 w-full md:w-72" style="background: var(--card-bg); border: 1px solid var(--border-soft);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted);" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
+                  <input id="globalSearch" type="search" placeholder="Tìm kênh nhạc hoặc tập podcast..." aria-label="Tim kenh nhac hoac tap podcast" class="bg-transparent border-0 outline-none text-xs w-full" style="color: var(--ink-primary);" />
+                </div>
+                <div id="discoverCategoryPills" class="flex flex-wrap items-center gap-2"></div>
+              </div>
+
+              <div id="discoverStationsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <div id="discoverEpisodesCard" class="bento-card rounded-[24px] p-5 sm:p-6 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Danh sách tập Podcast</h2>
+                <span id="discoverEpHint" class="text-xs" style="color: var(--ink-muted);">Bấm vào tập bất kỳ để nghe tiếp</span>
+              </div>
+              <div id="discoverEpisodesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- APP VIEW 3: USER DASHBOARD ("/dashboard" - USER/ADMIN ONLY) -->
+        <section id="view-dashboard" class="hidden flex-1 pb-24 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bento-card rounded-[22px] p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Tổng thời gian tuần này</div>
+              <div class="text-2xl font-semibold font-mono mt-1" style="color: var(--ink-primary);">342 phút</div>
+            </div>
+            <div class="bento-card rounded-[22px] p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Thói quen liên tục</div>
+              <div class="text-2xl font-semibold font-mono mt-1" style="color: var(--gold-text);">6 ngày liền</div>
+            </div>
+            <div class="bento-card rounded-[22px] p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Tập đang nghe dở</div>
+              <div class="text-2xl font-semibold font-mono mt-1" style="color: var(--ink-primary);">1 tập</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-7 space-y-4">
+              <article class="bento-card rounded-[24px] p-5 space-y-3">
+                <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Thời gian nghe &amp; tập trung 7 ngày qua</h2>
+                <canvas id="dashChartCanvas" class="w-full h-36 block" aria-label="Bieu do thong ke 7 ngay"></canvas>
+              </article>
+
+              <article class="bento-card rounded-[24px] p-5 space-y-3">
+                <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Kênh riêng của tôi</h2>
+                <form id="createStationForm" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                  <div class="sm:col-span-5">
+                    <label for="newStName" class="block text-xs font-medium mb-1" style="color: var(--ink-secondary);">Tên kênh mới</label>
+                    <input id="newStName" type="text" required placeholder="VD: Góc đọc sách tối" class="focus-ring w-full rounded-xl px-3 py-2 text-xs" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                  </div>
+                  <div class="sm:col-span-4">
+                    <label for="newStTag" class="block text-xs font-medium mb-1" style="color: var(--ink-secondary);">Chủ đề</label>
+                    <select id="newStTag" class="focus-ring w-full rounded-xl px-3 py-2 text-xs" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);">
+                      <option value="CODING">TẬP TRUNG CAO</option>
+                      <option value="DEEP WORK">LÀM VIỆC SÂU</option>
+                      <option value="PODCAST">PODCAST</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-3">
+                    <button type="submit" class="charcoal-pill tactile cursor-pointer focus-ring w-full rounded-xl py-2 text-xs font-semibold">Lưu kênh</button>
+                  </div>
+                </form>
+                <div id="myStationsList" class="space-y-2 pt-1"></div>
+              </article>
+            </div>
+
+            <div class="lg:col-span-5 space-y-4">
+              <article class="bento-card rounded-[24px] p-5 space-y-3">
+                <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Thêm link đài hoặc Podcast riêng</h2>
+                <form id="userSourceForm" class="space-y-2.5">
+                  <input id="userSrcTitle" type="text" required placeholder="Tên kênh cá nhân" class="focus-ring w-full rounded-xl px-3 py-2 text-xs" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                  <input id="userSrcUrl" type="url" required placeholder="https://kenh-cua-ban.vn/podcast" class="focus-ring w-full rounded-xl px-3 py-2 text-xs" style="background: var(--subcard-bg); border: 1px solid var(--border-soft); color: var(--ink-primary);" />
+                  <p id="userSrcMsg" class="text-xs hidden"></p>
+                  <button type="submit" class="gold-pill tactile cursor-pointer focus-ring rounded-full px-4 py-2 text-xs font-semibold">Kiểm tra &amp; Lưu kênh</button>
+                </form>
+                <div id="userPrivateSources" class="space-y-2 pt-2"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- APP VIEW 4: ADMIN HEALTH ("/admin" - ADMIN ONLY) -->
+        <section id="view-admin" class="hidden flex-1 pb-24 space-y-4">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bento-card rounded-2xl p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Kênh ổn định</div>
+              <div id="admHealthy" class="text-xl font-semibold font-mono mt-1" style="color: var(--status-ok);">2</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Tín hiệu chậm</div>
+              <div id="admDegraded" class="text-xl font-semibold font-mono mt-1" style="color: var(--status-warn);">1</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4">
+              <div class="text-xs" style="color: var(--ink-muted);">Đang gián đoạn</div>
+              <div id="admDown" class="text-xl font-semibold font-mono mt-1" style="color: var(--status-err);">1</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4 flex items-center justify-center">
+              <button id="adminProbeBtn" type="button" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-4 py-2 text-xs font-semibold">Kiểm tra tất cả</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <article class="bento-card rounded-[24px] p-5 lg:col-span-7 space-y-3">
+              <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Tình trạng các nguồn phát</h2>
+              <div id="adminHealthList" class="space-y-2.5"></div>
+            </article>
+            <article class="bento-card rounded-[24px] p-5 lg:col-span-5 space-y-3">
+              <h2 class="text-base font-semibold" style="color: var(--ink-primary);">Duyệt kênh cộng đồng</h2>
+              <div id="adminModList" class="space-y-2.5"></div>
+            </article>
+          </div>
+        </section>
+      </div>
+      </div>
+    </div>
+
+    <!-- FLOATING BOTTOM GLASS PLAYER DOCK (Visible on Discover/Dashboard/Admin) -->
+    <aside id="floatingDock" aria-label="Trinh phat nho gon" class="hidden fixed bottom-3 left-4 right-4 z-40">
+      <div class="liquid-chrome max-w-xl mx-auto rounded-full px-4 py-2 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <button id="dockPlayBtn" type="button" aria-label="Phat hoac tam dung" class="charcoal-pill tactile cursor-pointer focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0">
+            <svg id="dockPlaySvg" width="13" height="13" viewBox="0 0 24 24" fill="var(--gold-accent)" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+          </button>
+          <div class="min-w-0">
+            <div id="dockTitle" class="text-xs font-semibold truncate" style="color: var(--ink-primary);">Solar Morning</div>
+            <div id="dockSub" class="text-xs truncate" style="color: var(--ink-muted);">Tạm dừng</div>
+          </div>
+        </div>
+        <button type="button" data-nav="studio" class="gold-pill tactile cursor-pointer focus-ring rounded-full px-3.5 py-1.5 text-xs font-semibold shrink-0">Về Phòng nghe</button>
+      </div>
+    </aside>
+
+    <!-- ZEN MODE OVERLAY -->
+    <div id="zenOverlay" class="fixed inset-0 z-50 hidden" style="background: var(--shell-bg);" role="dialog" aria-modal="true" aria-labelledby="zenHeading">
+      <div class="w-full h-full p-6 sm:p-10 flex flex-col justify-between">
+        <div class="max-w-4xl w-full mx-auto flex items-center justify-between">
+          <span class="liquid-chrome rounded-full px-4 py-1.5 text-xs font-semibold" style="color: var(--ink-primary);">Chế độ tĩnh lặng</span>
+          <button id="zenCloseBtn" type="button" class="liquid-chrome tactile cursor-pointer focus-ring rounded-full px-4 py-2 text-xs font-medium" style="color: var(--ink-primary);">Thoát (Esc)</button>
+        </div>
+        <div class="max-w-xl w-full mx-auto text-center space-y-5">
+          <h2 id="zenHeading" class="text-3xl sm:text-5xl font-semibold tracking-tight" style="color: var(--ink-primary);">Solar Morning</h2>
+          <div id="zenTimerBig" class="text-6xl sm:text-7xl font-semibold font-mono tabular-nums" style="color: var(--ink-primary);">25:00</div>
+          <div class="bento-card rounded-[24px] p-4">
+            <canvas id="zenWaveCanvas" class="w-full h-24 block" aria-label="Sóng âm Zen"></canvas>
+          </div>
+          <div class="flex items-center justify-center gap-3">
+            <button id="zenPlayBtn" type="button" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-6 py-3 text-sm font-semibold">Phát</button>
+            <button id="zenTimerBtn" type="button" class="gold-pill tactile cursor-pointer focus-ring rounded-full px-6 py-3 text-sm font-semibold">Bắt đầu đếm</button>
+          </div>
+        </div>
+        <p class="text-center text-xs" style="color: var(--ink-muted);">Nhấn Esc để quay lại</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const GUEST_KEY = "focus_chill_quest_shell_v2";
+
+      const TAG_LABELS = {
+        LOFI: "THƯ GIÃN",
+        "DEEP WORK": "TẬP TRUNG SÂU",
+        PODCAST: "PODCAST",
+        CODING: "TẬP TRUNG CAO"
+      };
+      function tagText(tag) { return TAG_LABELS[tag] || tag; }
+
+      const state = {
+        theme: "light",
+        view: "landing", // Starts cleanly on Landing Page ("/")
+        role: "GUEST",   // GUEST | USER | ADMIN
+        userName: "Bạn",
+        categoryFilter: "ALL",
+        searchQuery: "",
+        isPlaying: false,
+        nowPlayingKind: "station",
+        activeStationId: "solar",
+        activeEpisodeId: "ep-1",
+        ambientLayers: [
+          { id: "rain", name: "Tiếng mưa nhẹ", volume: 40 },
+          { id: "cafe", name: "Quán cafe ấm", volume: 18 },
+          { id: "drone", name: "Âm nền dịu", volume: 26 }
+        ],
+        stations: [
+          { id: "solar", name: "Solar Morning", tag: "LOFI", source: "Chillhop FM", mins: 25, desc: "Nhịp lo-fi sáng rõ kết hợp tiếng mưa dịu nhẹ.", isPublic: true, isFeatured: true, hiddenByAdmin: false, owner: "Tuyển chọn", ambient: { rain: 40, cafe: 18, drone: 26 } },
+          { id: "rainy", name: "Golden Rain", tag: "DEEP WORK", source: "Lofi Beats FM", mins: 50, desc: "Nhịp trầm ổn định cho giờ tập trung dài.", isPublic: true, isFeatured: true, hiddenByAdmin: false, owner: "Tuyển chọn", ambient: { rain: 56, cafe: 10, drone: 30 } },
+          { id: "reading", name: "Bright Study", tag: "PODCAST", source: "The Present Writer", mins: 30, desc: "Nghe podcast truyền cảm hứng cùng nền quán cafe.", isPublic: true, isFeatured: true, hiddenByAdmin: false, owner: "Tuyển chọn", ambient: { rain: 16, cafe: 30, drone: 14 } },
+          { id: "acoustic", name: "Sớm Mai Acoustic", tag: "LOFI", source: "Acoustic Dawn FM", mins: 35, desc: "Guitar mộc nhẹ nhàng cho giờ đọc sách buổi sáng.", isPublic: true, isFeatured: true, hiddenByAdmin: false, owner: "Tuyển chọn", ambient: { rain: 20, cafe: 24, drone: 18 } },
+          { id: "sunset", name: "Cà Phê Cuối Chiều", tag: "PODCAST", source: "Radio Chậm Lại", mins: 40, desc: "Tản văn thư giãn cuối ngày với không khí quán quen.", isPublic: true, isFeatured: false, hiddenByAdmin: false, owner: "Lan Anh", ambient: { rain: 14, cafe: 42, drone: 16 } },
+          { id: "code11", name: "Late Night Sprint", tag: "CODING", source: "Sola Synth FM", mins: 45, desc: "Kênh gợi ý cộng đồng cho những buổi làm việc yên tĩnh.", isPublic: true, isFeatured: false, hiddenByAdmin: false, owner: "Minh Nguyễn", ambient: { rain: 22, cafe: 8, drone: 38 } }
+        ],
+        episodes: [
+          { id: "ep-1", title: "Giữ Nhịp Cân Bằng Mỗi Ngày", show: "Radio Tâm An", pos: 840, dur: 1920, status: "IN_PROGRESS" },
+          { id: "ep-2", title: "Tập Trung Giữa Thành Phố Ồn Ào", show: "The Present Writer", pos: 1380, dur: 1380, status: "COMPLETED" },
+          { id: "ep-3", title: "Nghệ Thuật Sắp Xếp Thời Gian Buổi Sáng", show: "Hôm Nay Nghe Gì", pos: 420, dur: 1500, status: "IN_PROGRESS" },
+          { id: "ep-4", title: "Ngủ Ngon Sau Ngày Dài Làm Việc", show: "Radio Chậm Lại", pos: 1200, dur: 1200, status: "COMPLETED" }
+        ],
+        sources: [
+          { id: "s1", title: "Chillhop FM", kindLabel: "Đài trực tiếp · fluxfm.de", url: "https://streams.fluxfm.de/chillhop/mp3-320", status: "HEALTHY", latency: 38 },
+          { id: "s2", title: "The Present Writer", kindLabel: "Kênh Podcast · anchor.fm", url: "https://anchor.fm/s/1351475c/podcast/rss", status: "HEALTHY", latency: 108 },
+          { id: "s3", title: "VOV Giao Thông Trực Tiếp", kindLabel: "Đài phát sóng · vov.example", url: "https://stream.vov.example/live.m3u8", status: "DEGRADED", latency: 440 },
+          { id: "s4", title: "Góc Đọc Sách Đêm", kindLabel: "Kênh Podcast · legacy.example", url: "https://feeds.legacy.example/rss.xml", status: "DOWN", latency: null }
+        ],
+        privateSources: [
+          { id: "p1", title: "Ghi chú & Podcast cá nhân", url: "https://kenh-rieng.example/feed" }
+        ],
+        weekly: [38, 52, 44, 68, 46, 62, 42],
+        secondsLeft: 25 * 60,
+        timerMode: "focus",
+        timerRunning: false,
+        timerHandle: null
+      };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(GUEST_KEY) || "null");
+        if (saved && (saved.theme === "light" || saved.theme === "dark")) state.theme = saved.theme;
+        if (saved && saved.activeStationId) state.activeStationId = saved.activeStationId;
+        if (saved && Array.isArray(saved.volumes)) {
+          state.ambientLayers.forEach((l, i) => {
+            if (typeof saved.volumes[i] === "number") l.volume = saved.volumes[i];
+          });
+        }
+      } catch (_) {}
+
+      function persistGuest() {
+        try {
+          localStorage.setItem(GUEST_KEY, JSON.stringify({
+            theme: state.theme,
+            activeStationId: state.activeStationId,
+            volumes: state.ambientLayers.map(l => l.volume)
+          }));
+        } catch (_) {}
+      }
+
+      // Web Audio API Ambient Engine
+      let audioCtx = null;
+      const nodes = {};
+
+      function initAudio() {
+        if (audioCtx) return;
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        audioCtx = new Ctx();
+        const master = audioCtx.createGain();
+        master.gain.value = 0;
+        master.connect(audioCtx.destination);
+        nodes.master = master;
+
+        const len = audioCtx.sampleRate * 2;
+        const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+        const ch = buf.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < len; i++) {
+          const w = Math.random() * 2 - 1;
+          b0 = 0.99765 * b0 + w * 0.099046;
+          b1 = 0.96300 * b1 + w * 0.296516;
+          b2 = 0.57000 * b2 + w * 1.052691;
+          ch[i] = (b0 + b1 + b2 + w * 0.1848) * 0.12;
+        }
+        function noiseLayer(type, freq, q) {
+          const s = audioCtx.createBufferSource();
+          s.buffer = buf; s.loop = true;
+          const f = audioCtx.createBiquadFilter();
+          f.type = type; f.frequency.value = freq; f.Q.value = q;
+          const g = audioCtx.createGain(); g.gain.value = 0;
+          s.connect(f); f.connect(g); g.connect(master); s.start();
+          return g;
+        }
+        nodes.rain = noiseLayer("bandpass", 1050, 0.7);
+        nodes.cafe = noiseLayer("lowpass", 410, 0.8);
+
+        const droneGain = audioCtx.createGain();
+        droneGain.gain.value = 0;
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = "lowpass"; lp.frequency.value = 500;
+        [174.61, 220.0, 261.63].forEach(hz => {
+          const osc = audioCtx.createOscillator();
+          osc.type = "triangle"; osc.frequency.value = hz; osc.connect(lp); osc.start();
+        });
+        lp.connect(droneGain); droneGain.connect(master);
+        nodes.drone = droneGain;
+        syncGains();
+      }
+
+      function syncGains() {
+        if (!audioCtx || !nodes.master) return;
+        const t = audioCtx.currentTime;
+        const active = state.isPlaying ? 1 : 0;
+        const fade = (state.timerMode === "sleep" && state.timerRunning && state.secondsLeft <= 15)
+          ? Math.max(0, state.secondsLeft / 15) : 1;
+        nodes.master.gain.setTargetAtTime(0.36 * active * fade, t, 0.08);
+        state.ambientLayers.forEach(l => {
+          if (nodes[l.id]) {
+            nodes[l.id].gain.setTargetAtTime((l.volume / 100) * (l.id === "drone" ? 0.14 : 0.6), t, 0.08);
+          }
+        });
+      }
+
+      function togglePlay(force) {
+        initAudio();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        state.isPlaying = typeof force === "boolean" ? force : !state.isPlaying;
+        syncGains();
+        renderChrome();
+      }
+
+      function fmt(sec) {
+        return `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+      }
+
+      function applyTheme(mode) {
+        state.theme = mode === "dark" ? "dark" : "light";
+        document.getElementById("appRoot").setAttribute("data-theme", state.theme);
+        document.body.style.backgroundColor = state.theme === "dark" ? "#111217" : "#F4F1EA";
+        document.querySelectorAll(".theme-pill").forEach(btn => {
+          const active = btn.dataset.themeBtn === state.theme;
+          btn.style.background = active ? "var(--dark-pill)" : "transparent";
+          btn.style.color = active ? "var(--ink-on-dark)" : "var(--ink-muted)";
+        });
+        persistGuest();
+        drawAll();
+      }
+
+      document.querySelectorAll(".theme-pill").forEach(b => {
+        b.addEventListener("click", () => applyTheme(b.dataset.themeBtn));
+      });
+
+      function setRole(role) {
+        state.role = role;
+        state.userName = role === "ADMIN" ? "Quản trị viên" : role === "USER" ? "Minh Nguyễn" : "Bạn";
+        document.getElementById("studioGreeting").textContent = `Xin chào, ${state.userName}`;
+        document.getElementById("avatarMenuBtn").textContent = role === "ADMIN" ? "Q" : role === "USER" ? "M" : "K";
+        document.getElementById("popoverRoleTitle").textContent = role === "GUEST" ? "Khách nghe thử" : role === "ADMIN" ? "Quản trị viên" : `${state.userName} · Thành viên`;
+
+        // Role-based Left Rail visibility
+        document.getElementById("railDashboardWrap").classList.toggle("hidden", role === "GUEST");
+        document.getElementById("railAdminWrap").classList.toggle("hidden", role !== "ADMIN");
+
+        // If user drops role below current view, redirect cleanly
+        if (role === "GUEST" && (state.view === "dashboard" || state.view === "admin")) navigate("studio");
+        if (role === "USER" && state.view === "admin") navigate("dashboard");
+
+        updateAppTopHeader();
+        renderUserDashboard();
+        renderAdmin();
+        renderRightBoard();
+      }
+
+      function updateAppTopHeader() {
+        const meta = {
+          studio: { title: "Phòng nghe", sub: "Bật chút nhạc nhẹ, giữ trọn nhịp làm việc của bạn" },
+          discover: { title: "Khám phá", sub: "Tìm một giai điệu hợp tâm trạng lúc này" },
+          dashboard: { title: "Góc cá nhân", sub: "Kênh bạn tự lưu và nhật ký mỗi ngày" },
+          admin: { title: "Quản lý kênh", sub: "Theo dõi tín hiệu phát và duyệt kênh mới" }
+        };
+        const current = meta[state.view] || meta.studio;
+        document.getElementById("pageHeaderTitle").textContent = current.title;
+        document.getElementById("pageHeaderSub").textContent = current.sub;
+
+        const topBtn = document.getElementById("topCtaBtn");
+        if (state.role === "GUEST") {
+          topBtn.textContent = "Đăng nhập";
+        } else if (state.view === "dashboard" || state.view === "admin") {
+          topBtn.textContent = "Về Phòng nghe";
+        } else {
+          topBtn.textContent = "+ Tạo kênh mới";
+        }
+      }
+
+      function renderRailIcons() {
+        const icons = {
+          studio: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+          discover: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
+          dashboard: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
+          admin: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>'
+        };
+        document.querySelectorAll(".rail-btn").forEach(btn => {
+          const target = btn.dataset.nav;
+          const active = state.view === target;
+          btn.innerHTML = icons[target];
+          btn.style.background = active ? "var(--dark-pill)" : "transparent";
+          btn.style.color = active ? "var(--gold-accent)" : "var(--ink-secondary)";
+        });
+      }
+
+      function navigate(view) {
+        if (view === "dashboard" && state.role === "GUEST") view = "login";
+        if (view === "admin" && state.role !== "ADMIN") view = state.role === "GUEST" ? "login" : "dashboard";
+
+        state.view = view;
+        const isPublic = view === "landing" || view === "login";
+
+        // Toggle Public Shell vs App Shell cleanly
+        document.getElementById("publicShell").classList.toggle("hidden", !isPublic);
+        document.getElementById("appShell").classList.toggle("hidden", isPublic);
+
+        if (isPublic) {
+          document.getElementById("view-landing").classList.toggle("hidden", view !== "landing");
+          document.getElementById("view-login").classList.toggle("hidden", view !== "login");
+          document.getElementById("pubHeaderActionBtn").textContent = view === "login" ? "Nghe thử" : "Đăng nhập";
+        } else {
+          ["studio", "discover", "dashboard", "admin"].forEach(v => {
+            document.getElementById(`view-${v}`).classList.toggle("hidden", v !== view);
+          });
+          updateAppTopHeader();
+          renderRailIcons();
+        }
+
+        document.getElementById("avatarPopover").classList.add("hidden");
+        const showDock = ["discover", "dashboard", "admin"].includes(view);
+        document.getElementById("floatingDock").classList.toggle("hidden", !showDock);
+        window.scrollTo(0, 0);
+        drawAll();
+      }
+
+      document.querySelectorAll("[data-nav]").forEach(el => {
+        el.addEventListener("click", () => navigate(el.dataset.nav));
+      });
+
+      document.getElementById("pubHeaderActionBtn").addEventListener("click", () => {
+        navigate(state.view === "login" ? "studio" : "login");
+      });
+
+      document.getElementById("topCtaBtn").addEventListener("click", () => {
+        if (state.role === "GUEST") navigate("login");
+        else if (state.view === "dashboard" || state.view === "admin") navigate("studio");
+        else navigate("dashboard");
+      });
+
+      document.getElementById("landingTryGuestBtn").addEventListener("click", () => {
+        setRole("GUEST");
+        navigate("studio");
+      });
+      document.getElementById("landingLoginBtn").addEventListener("click", () => navigate("login"));
+      document.getElementById("continueGuestBtn").addEventListener("click", () => {
+        setRole("GUEST");
+        navigate("studio");
+      });
+
+      // Avatar role switcher popover inside App Shell
+      document.getElementById("avatarMenuBtn").addEventListener("click", e => {
+        e.stopPropagation();
+        document.getElementById("avatarPopover").classList.toggle("hidden");
+      });
+      document.addEventListener("click", () => {
+        document.getElementById("avatarPopover").classList.add("hidden");
+      });
+      document.querySelectorAll("[data-pop-role]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const r = btn.dataset.popRole;
+          setRole(r);
+          if (r === "ADMIN") navigate("admin");
+          else if (r === "USER") navigate("dashboard");
+          else navigate("studio");
+        });
+      });
+
+      document.querySelectorAll("[data-quick-launch]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          setRole("GUEST");
+          applyStation(btn.dataset.quickLaunch, true);
+          navigate("studio");
+        });
+      });
+
+      document.getElementById("loginForm").addEventListener("submit", e => {
+        e.preventDefault();
+        setRole("USER");
+        navigate("dashboard");
+      });
+
+      document.querySelectorAll("[data-demo-role]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const r = btn.dataset.demoRole;
+          setRole(r);
+          navigate(r === "ADMIN" ? "admin" : r === "USER" ? "dashboard" : "studio");
+        });
+      });
+
+      function renderCategoryPills() {
+        const cats = [
+          { id: "ALL", label: "Tất cả" },
+          { id: "LOFI", label: "Lo-fi Thư giãn" },
+          { id: "FOCUS", label: "Tập trung sâu" },
+          { id: "PODCAST", label: "Podcast" }
+        ];
+        const wrap = document.getElementById("discoverCategoryPills");
+        wrap.innerHTML = cats.map(c => {
+          const active = state.categoryFilter === c.id;
+          return `
+            <button type="button" data-cat="${c.id}" class="tactile cursor-pointer focus-ring rounded-full px-3.5 h-9 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap ${active ? "charcoal-pill" : ""}" style="${active ? "" : "background: var(--card-bg); border: 1px solid var(--border-soft); color: var(--ink-secondary);"}">
+              ${active ? '<span class="w-2 h-2 rounded-full" style="background: var(--gold-accent);"></span>' : ''}
+              ${c.label}
+            </button>
+          `;
+        }).join("");
+
+        wrap.querySelectorAll("[data-cat]").forEach(b => {
+          b.addEventListener("click", () => {
+            state.categoryFilter = b.dataset.cat;
+            renderCategoryPills();
+            renderDiscover();
+          });
+        });
+      }
+
+      document.getElementById("globalSearch").addEventListener("input", e => {
+        state.searchQuery = e.target.value.trim().toLowerCase();
+        renderDiscover();
+      });
+
+      function renderCalendar() {
+        const days = [
+          { d: "T2", n: 12, done: true },
+          { d: "T3", n: 13, done: true },
+          { d: "T4", n: 14, done: true },
+          { d: "T5", n: 15, today: true },
+          { d: "T6", n: 16, done: false },
+          { d: "T7", n: 17, done: false },
+          { d: "CN", n: 18, done: false }
+        ];
+        document.getElementById("weekCalendarStrip").innerHTML = days.map(item => `
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-xs" style="color: var(--ink-muted);">${item.d}</span>
+            <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${item.today ? "gold-pill" : ""}" style="${item.today ? "" : item.done ? "background: var(--subcard-bg); color: var(--ink-primary);" : "color: var(--ink-muted);"}">
+              ${item.n}
+            </span>
+          </div>
+        `).join("");
+      }
+
+      function renderAmbientStack() {
+        const box = document.getElementById("ambientStackBox");
+        box.innerHTML = state.ambientLayers.map((l, idx) => {
+          const isPrimary = idx === 0;
+          return `
+            <div class="bento-card rounded-2xl p-3.5 flex-1 flex flex-col justify-center space-y-2">
+              <div class="flex items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center ${isPrimary ? "charcoal-pill" : "sub-tile"}" style="${isPrimary ? "color: var(--gold-accent);" : "color: var(--ink-primary);"}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M6 7v10M18 7v10"/></svg>
+                  </span>
+                  <div class="min-w-0">
+                    <div class="text-xs font-semibold truncate" style="color: var(--ink-primary);">${l.name}</div>
+                    <div id="amb-val-${l.id}" class="text-xs font-mono" style="color: var(--ink-muted);">${l.volume}%</div>
+                  </div>
+                </div>
+              </div>
+              <input data-amb-rng="${l.id}" type="range" min="0" max="100" value="${l.volume}" aria-label="${l.name}" class="mini-range w-full" />
+            </div>
+          `;
+        }).join("");
+
+        box.querySelectorAll("[data-amb-rng]").forEach(inp => {
+          inp.addEventListener("input", e => {
+            const id = e.target.dataset.ambRng;
+            const val = Number(e.target.value);
+            const target = state.ambientLayers.find(x => x.id === id);
+            if (target) target.volume = val;
+            document.getElementById(`amb-val-${id}`).textContent = `${val}%`;
+            syncGains();
+            persistGuest();
+          });
+        });
+      }
+
+      function playEpisode(id, openStudio) {
+        const ep = state.episodes.find(e => e.id === id);
+        if (!ep) return;
+        state.activeEpisodeId = ep.id;
+        state.nowPlayingKind = "episode";
+        renderBottomEpisodes();
+        renderRightBoard();
+        togglePlay(true);
+        if (openStudio) navigate("studio");
+      }
+
+      function renderBottomEpisodes() {
+        const box = document.getElementById("studioBottomEpisodes");
+        box.innerHTML = state.episodes.slice(0, 2).map(ep => {
+          const pct = Math.min(100, Math.round((ep.pos / ep.dur) * 100));
+          const active = state.nowPlayingKind === "episode" && ep.id === state.activeEpisodeId;
+          return `
+            <button type="button" data-ep-pick="${ep.id}" class="bento-card tactile cursor-pointer focus-ring rounded-[22px] p-4 flex items-center justify-between gap-3 text-left" style="${active ? "border-color: var(--gold-accent);" : ""}">
+              <div class="space-y-1.5 min-w-0">
+                <div class="text-sm font-semibold truncate" style="color: var(--ink-primary);">${ep.title}</div>
+                <div class="text-xs" style="color: var(--ink-muted);">${ep.show} · ${fmt(ep.pos)}</div>
+                <div class="flex items-center gap-2 pt-1">
+                  <span class="charcoal-pill rounded-full px-2.5 py-0.5 text-xs font-mono font-semibold">${pct}%</span>
+                  <span class="text-xs" style="color: var(--ink-secondary);">${ep.status === "COMPLETED" ? "Đã nghe xong" : "Đang nghe dở"}</span>
+                </div>
+              </div>
+              <div class="w-16 h-16 rounded-2xl shrink-0 flex items-center justify-center" style="background: linear-gradient(135deg, var(--subcard-bg), var(--gold-soft-bg)); color: var(--gold-text);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+              </div>
+            </button>
+          `;
+        }).join("");
+
+        box.querySelectorAll("[data-ep-pick]").forEach(b => {
+          b.addEventListener("click", () => playEpisode(b.dataset.epPick, false));
+        });
+      }
+
+      function matchesStation(st, respectGuest) {
+        if (st.hiddenByAdmin) return false;
+        if (respectGuest && state.role === "GUEST" && !st.isFeatured) return false;
+        const catOk = state.categoryFilter === "ALL"
+          || (state.categoryFilter === "FOCUS" ? (st.tag === "DEEP WORK" || st.tag === "CODING") : st.tag === state.categoryFilter);
+        const q = state.searchQuery;
+        const qOk = !q || st.name.toLowerCase().includes(q) || st.source.toLowerCase().includes(q) || st.desc.toLowerCase().includes(q);
+        return catOk && qOk;
+      }
+
+      function renderRightBoard() {
+        const mode = document.getElementById("boardModeSelect").value;
+        const list = document.getElementById("rightBoardList");
+        if (mode === "queue") {
+          list.innerHTML = state.episodes.map(ep => {
+            const active = state.nowPlayingKind === "episode" && ep.id === state.activeEpisodeId;
+            return `
+              <button type="button" data-board-ep="${ep.id}" class="sub-tile tactile cursor-pointer focus-ring w-full text-left rounded-2xl p-3.5 space-y-2 block" style="${active ? "border-color: var(--gold-accent);" : ""}">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold truncate" style="color: var(--ink-primary);">${ep.title}</span>
+                  <span class="gold-pill rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0">Podcast</span>
+                </div>
+                <p class="text-xs" style="color: var(--ink-secondary);">${ep.show} · ${fmt(ep.pos)} / ${fmt(ep.dur)}</p>
+              </button>
+            `;
+          }).join("");
+          list.querySelectorAll("[data-board-ep]").forEach(btn => {
+            btn.addEventListener("click", () => playEpisode(btn.dataset.boardEp, false));
+          });
+          return;
+        }
+
+        const items = state.stations.filter(st => !st.hiddenByAdmin && (state.role !== "GUEST" || st.isFeatured));
+        if (items.length === 0) {
+          list.innerHTML = `<div class="sub-tile rounded-2xl p-4 text-xs text-center" style="color: var(--ink-muted);">Không tìm thấy kênh phù hợp.</div>`;
+          return;
+        }
+        list.innerHTML = items.map(st => {
+          const active = state.nowPlayingKind === "station" && st.id === state.activeStationId;
+          return `
+            <button type="button" data-board-st="${st.id}" class="sub-tile tactile cursor-pointer focus-ring w-full text-left rounded-2xl p-3.5 space-y-2 block" style="${active ? "border-color: var(--gold-accent);" : ""}">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-semibold truncate" style="color: var(--ink-primary);">${st.name}</span>
+                <span class="gold-pill rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0">${tagText(st.tag)}</span>
+              </div>
+              <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">${st.desc}</p>
+              <div class="flex items-center justify-between text-xs pt-1" style="color: var(--ink-muted);">
+                <span>Nhịp ${st.mins} phút</span>
+                <span>${st.source}</span>
+              </div>
+            </button>
+          `;
+        }).join("");
+
+        list.querySelectorAll("[data-board-st]").forEach(btn => {
+          btn.addEventListener("click", () => applyStation(btn.dataset.boardSt, true));
+        });
+      }
+
+      document.getElementById("boardModeSelect").addEventListener("change", renderRightBoard);
+
+      function applyStation(id, autoplay) {
+        const st = state.stations.find(s => s.id === id);
+        if (!st) return;
+        state.activeStationId = st.id;
+        state.nowPlayingKind = "station";
+        Object.entries(st.ambient).forEach(([k, v]) => {
+          const l = state.ambientLayers.find(x => x.id === k);
+          if (l) l.volume = v;
+        });
+        state.secondsLeft = st.mins * 60;
+        renderAmbientStack();
+        renderRightBoard();
+        renderBottomEpisodes();
+        renderDiscover();
+        renderTimerDisplay();
+        persistGuest();
+        if (autoplay) togglePlay(true);
+        else renderChrome();
+      }
+
+      function renderChrome() {
+        const st = state.stations.find(s => s.id === state.activeStationId) || state.stations[0];
+        const ep = state.episodes.find(e => e.id === state.activeEpisodeId) || state.episodes[0];
+        const isEp = state.nowPlayingKind === "episode" && ep;
+        const nowTitle = isEp ? ep.title : st.name;
+        const nowSub = isEp ? `${ep.show} · Nghe tiếp ${fmt(ep.pos)}` : st.source;
+        const nowDesc = isEp ? `Đang phát tập Podcast từ ${ep.show} (${fmt(ep.pos)} / ${fmt(ep.dur)})` : st.desc;
+
+        const playSvg = '<polygon points="6 3 20 12 6 21 6 3" />';
+        const pauseSvg = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        document.getElementById("stripPlaySvg").innerHTML = state.isPlaying ? pauseSvg : playSvg;
+        document.getElementById("dockPlaySvg").innerHTML = state.isPlaying ? pauseSvg : playSvg;
+        const landingSvg = document.getElementById("landingPlaySvg");
+        if (landingSvg) landingSvg.innerHTML = state.isPlaying ? pauseSvg : playSvg;
+
+        document.getElementById("heroTrackTitle").textContent = nowTitle;
+        document.getElementById("heroTrackSub").textContent = nowSub;
+        document.getElementById("spotlightTitle").textContent = nowTitle;
+        document.getElementById("spotlightDesc").textContent = nowDesc;
+        document.getElementById("dockTitle").textContent = nowTitle;
+        document.getElementById("dockSub").textContent = `${isEp ? ep.show : st.source} · ${state.isPlaying ? "Đang phát" : "Tạm dừng"}`;
+        document.getElementById("zenHeading").textContent = nowTitle;
+        document.getElementById("zenPlayBtn").textContent = state.isPlaying ? "Tạm dừng" : "Phát";
+        const lTitle = document.getElementById("landingPreviewTitle");
+        if (lTitle) lTitle.textContent = `${state.isPlaying ? "Đang phát" : "Nghe thử"}: ${st.name}`;
+        const lStageT = document.getElementById("landingStageTitle");
+        if (lStageT) lStageT.textContent = st.name;
+      }
+
+      function renderTimerDisplay() {
+        const s = fmt(Math.max(0, state.secondsLeft));
+        document.getElementById("stripTimerTxt").textContent = s;
+        document.getElementById("spotlightCountdown").textContent = s;
+        document.getElementById("zenTimerBig").textContent = s;
+        document.getElementById("calendarTimerInfo").textContent = `${s} · ${state.timerRunning ? "Đang đếm" : "Sẵn sàng"}`;
+      }
+
+      function toggleTimer() {
+        if (state.timerRunning) {
+          clearInterval(state.timerHandle);
+          state.timerRunning = false;
+          document.getElementById("calendarTimerBtn").textContent = "Tiếp tục";
+          document.getElementById("zenTimerBtn").textContent = "Tiếp tục";
+        } else {
+          state.timerRunning = true;
+          document.getElementById("calendarTimerBtn").textContent = "Tạm dừng";
+          document.getElementById("zenTimerBtn").textContent = "Tạm dừng";
+          state.timerHandle = setInterval(() => {
+            if (state.secondsLeft > 0) {
+              state.secondsLeft -= 1;
+              if (state.timerMode === "sleep" && state.secondsLeft <= 15 && state.isPlaying) syncGains();
+              renderTimerDisplay();
+            } else {
+              clearInterval(state.timerHandle);
+              state.timerRunning = false;
+              if (state.timerMode === "sleep") togglePlay(false);
+            }
+          }, 1000);
+        }
+        renderTimerDisplay();
+      }
+
+      document.getElementById("stripPlayBtn").addEventListener("click", () => togglePlay());
+      document.getElementById("dockPlayBtn").addEventListener("click", () => togglePlay());
+      document.getElementById("zenPlayBtn").addEventListener("click", () => togglePlay());
+      document.getElementById("landingPreviewPlayBtn").addEventListener("click", () => togglePlay());
+
+      // Auth Login / Register tab toggle
+      document.querySelectorAll(".auth-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const isReg = btn.dataset.authTab === "register";
+          document.getElementById("registerNameWrap").classList.toggle("hidden", !isReg);
+          document.getElementById("authHeading").textContent = isReg ? "Tạo tài khoản mới" : "Đăng nhập tài khoản";
+          document.getElementById("authSubmitBtn").textContent = isReg ? "Đăng ký & Đồng bộ" : "Đăng nhập";
+          document.querySelectorAll(".auth-tab-btn").forEach(b => {
+            const active = b === btn;
+            b.className = `auth-tab-btn cursor-pointer focus-ring rounded-full px-3.5 py-1.5 ${active ? "font-semibold charcoal-pill" : "font-medium"}`;
+            b.style.color = active ? "" : "var(--ink-secondary)";
+          });
+        });
+      });
+      document.getElementById("calendarTimerBtn").addEventListener("click", toggleTimer);
+      document.getElementById("zenTimerBtn").addEventListener("click", toggleTimer);
+
+      document.querySelectorAll(".timer-opt-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          clearInterval(state.timerHandle);
+          state.timerRunning = false;
+          state.timerMode = "focus";
+          state.secondsLeft = Number(btn.dataset.timerOpt) * 60;
+          document.querySelectorAll(".timer-opt-btn").forEach(b => {
+            const active = b === btn;
+            b.className = `timer-opt-btn cursor-pointer focus-ring rounded-full px-2.5 py-1 text-xs ${active ? "font-semibold charcoal-pill" : "font-medium sub-tile"}`;
+            b.style.color = active ? "" : "var(--ink-secondary)";
+          });
+          renderTimerDisplay();
+        });
+      });
+
+      document.getElementById("spotlightSleepBtn").addEventListener("click", () => {
+        clearInterval(state.timerHandle);
+        state.timerRunning = false;
+        state.timerMode = "sleep";
+        state.secondsLeft = 30 * 60;
+        toggleTimer();
+      });
+
+      document.getElementById("autoResumeChip").addEventListener("click", () => {
+        playEpisode("ep-1", false);
+      });
+
+      document.getElementById("quickGoalChip").addEventListener("click", () => {
+        clearInterval(state.timerHandle);
+        state.timerRunning = false;
+        state.timerMode = "focus";
+        state.secondsLeft = 25 * 60;
+        toggleTimer();
+        togglePlay(true);
+      });
+
+      document.getElementById("prevStationBtn").addEventListener("click", () => {
+        const idx = state.stations.findIndex(s => s.id === state.activeStationId);
+        const prev = state.stations[(idx - 1 + state.stations.length) % state.stations.length];
+        applyStation(prev.id, true);
+      });
+
+      document.getElementById("recommendStationBtn").addEventListener("click", () => {
+        const others = state.stations.filter(s => s.id !== state.activeStationId && !s.hiddenByAdmin);
+        const pick = others[Math.floor(Math.random() * others.length)] || state.stations[0];
+        applyStation(pick.id, true);
+      });
+
+      function renderDiscover() {
+        const grid = document.getElementById("discoverStationsGrid");
+        const visible = state.stations.filter(st => matchesStation(st, false));
+        const countEl = document.getElementById("discoverCountBadge");
+        if (countEl) countEl.textContent = `${visible.length} kênh phù hợp`;
+        if (visible.length === 0) {
+          grid.innerHTML = `<div class="sub-tile rounded-2xl p-6 text-center text-xs sm:col-span-2 lg:col-span-3" style="color: var(--ink-muted);">Không tìm thấy kênh nào khớp từ khóa hiện tại.</div>`;
+        } else {
+          grid.innerHTML = visible.map(st => {
+            const active = state.nowPlayingKind === "station" && st.id === state.activeStationId;
+            return `
+              <article class="sub-tile rounded-2xl p-4 flex flex-col justify-between gap-3" style="${active ? "border-color: var(--gold-accent);" : ""}">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <span class="gold-pill rounded-full px-2.5 py-0.5 text-xs font-semibold">${tagText(st.tag)}</span>
+                    <h3 class="text-base font-semibold mt-1.5" style="color: var(--ink-primary);">${st.name}</h3>
+                  </div>
+                  <span class="text-xs" style="color: var(--ink-muted);">${st.owner}</span>
+                </div>
+                <p class="text-xs leading-relaxed" style="color: var(--ink-secondary);">${st.desc}</p>
+                <div class="flex items-center justify-between pt-2" style="border-top: 1px solid var(--border-soft);">
+                  <span class="text-xs" style="color: var(--ink-muted);">${st.source}</span>
+                  <button type="button" data-d-st="${st.id}" class="charcoal-pill tactile cursor-pointer focus-ring rounded-full px-3.5 py-1 text-xs font-semibold">Nghe</button>
+                </div>
+              </article>
+            `;
+          }).join("");
+
+          grid.querySelectorAll("[data-d-st]").forEach(b => {
+            b.addEventListener("click", () => { applyStation(b.dataset.dSt, true); navigate("studio"); });
+          });
+        }
+
+        const epCard = document.getElementById("discoverEpisodesCard");
+        const epHint = document.getElementById("discoverEpHint");
+        const isPodcastTab = state.categoryFilter === "PODCAST";
+        if (epCard) epCard.style.borderColor = isPodcastTab ? "var(--gold-accent)" : "";
+
+        const q = state.searchQuery;
+        const epVisible = state.episodes.filter(ep => !q || ep.title.toLowerCase().includes(q) || ep.show.toLowerCase().includes(q));
+        if (epHint) {
+          epHint.textContent = isPodcastTab ? "Đang làm nổi bật theo chủ đề Podcast" : "Bấm vào tập bất kỳ để nghe tiếp";
+          epHint.style.color = isPodcastTab ? "var(--gold-text)" : "var(--ink-muted)";
+        }
+
+        const epGrid = document.getElementById("discoverEpisodesGrid");
+        if (epVisible.length === 0) {
+          epGrid.innerHTML = `<div class="sub-tile rounded-2xl p-5 text-center text-xs md:col-span-2" style="color: var(--ink-muted);">Không tìm thấy tập podcast phù hợp.</div>`;
+          return;
+        }
+        epGrid.innerHTML = epVisible.map(ep => `
+          <button type="button" data-d-ep="${ep.id}" class="sub-tile tactile cursor-pointer focus-ring text-left rounded-2xl p-3.5 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold truncate" style="color: var(--ink-primary);">${ep.title}</div>
+              <div class="text-xs" style="color: var(--ink-muted);">${ep.show} · ${ep.status === "COMPLETED" ? "Đã nghe xong" : "Nghe tiếp"}</div>
+            </div>
+            <span class="charcoal-pill rounded-full px-2.5 py-1 text-xs font-mono shrink-0">${fmt(ep.pos)}</span>
+          </button>
+        `).join("");
+        epGrid.querySelectorAll("[data-d-ep]").forEach(b => {
+          b.addEventListener("click", () => playEpisode(b.dataset.dEp, true));
+        });
+      }
+
+      function renderUserDashboard() {
+        document.getElementById("myStationsList").innerHTML = state.stations.filter(s => s.owner !== "Tuyển chọn").map(st => `
+          <div class="sub-tile rounded-xl p-3 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-semibold" style="color: var(--ink-primary);">${st.name} <span class="gold-pill rounded-full px-2 py-0.5 ml-1">${tagText(st.tag)}</span></div>
+              <div class="text-xs" style="color: var(--ink-muted);">${st.isPublic ? "Chia sẻ công khai" : "Chỉ mình tôi"}</div>
+            </div>
+            <button type="button" data-use-st="${st.id}" class="charcoal-pill cursor-pointer focus-ring rounded-full px-3 py-1 text-xs font-semibold">Phát</button>
+          </div>
+        `).join("");
+        document.querySelectorAll("[data-use-st]").forEach(b => {
+          b.addEventListener("click", () => { applyStation(b.dataset.useSt, true); navigate("studio"); });
+        });
+
+        document.getElementById("userPrivateSources").innerHTML = state.privateSources.map(p => `
+          <div class="sub-tile rounded-xl p-2.5">
+            <div class="text-xs font-semibold" style="color: var(--ink-primary);">${p.title}</div>
+            <div class="text-xs truncate" style="color: var(--ink-muted);">${p.url}</div>
+          </div>
+        `).join("");
+      }
+
+      document.getElementById("createStationForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const name = document.getElementById("newStName").value.trim();
+        const tag = document.getElementById("newStTag").value;
+        state.stations.push({
+          id: "st-" + Date.now(), name, tag, source: "Chillhop FM", mins: 25,
+          desc: "Kênh cá nhân do bạn tự phối âm thanh.", isPublic: true, isFeatured: false, hiddenByAdmin: false,
+          owner: state.userName, ambient: { rain: 30, cafe: 20, drone: 25 }
+        });
+        e.target.reset();
+        renderUserDashboard(); renderRightBoard(); renderDiscover(); renderAdmin();
+      });
+
+      document.getElementById("userSourceForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const title = document.getElementById("userSrcTitle").value.trim();
+        const url = document.getElementById("userSrcUrl").value.trim();
+        const msg = document.getElementById("userSrcMsg");
+        if (/localhost|127\.0\.0\.1|169\.254\./i.test(url)) {
+          msg.textContent = "Đường dẫn không hợp lệ: chỉ hỗ trợ địa chỉ công khai an toàn.";
+          msg.style.color = "var(--status-err)";
+          msg.className = "text-xs block";
+          return;
+        }
+        state.privateSources.unshift({ id: "p-" + Date.now(), title, url });
+        msg.textContent = "Đã lưu kênh riêng của bạn.";
+        msg.style.color = "var(--status-ok)";
+        msg.className = "text-xs block";
+        e.target.reset();
+        renderUserDashboard();
+      });
+
+      function renderAdmin() {
+        document.getElementById("admHealthy").textContent = state.sources.filter(s => s.status === "HEALTHY").length;
+        document.getElementById("admDegraded").textContent = state.sources.filter(s => s.status === "DEGRADED").length;
+        document.getElementById("admDown").textContent = state.sources.filter(s => s.status === "DOWN").length;
+
+        const statusMap = { HEALTHY: "Ổn định", DEGRADED: "Chập chờn", DOWN: "Mất kết nối" };
+
+        document.getElementById("adminHealthList").innerHTML = state.sources.map(src => {
+          const c = src.status === "HEALTHY" ? "var(--status-ok)" : src.status === "DEGRADED" ? "var(--status-warn)" : "var(--status-err)";
+          const speedText = src.latency ? (src.latency < 200 ? "Phản hồi nhanh" : "Hơi chậm") : "Không phản hồi";
+          return `
+            <div class="sub-tile rounded-xl p-3 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold truncate" style="color: var(--ink-primary);">${src.title}</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full" style="border: 1px solid ${c}; color: ${c};">${statusMap[src.status] || src.status}</span>
+                </div>
+                <div class="text-xs truncate" style="color: var(--ink-muted);">${src.kindLabel}</div>
+              </div>
+              <span class="text-xs font-semibold shrink-0" style="color: var(--ink-primary);">${speedText}</span>
+            </div>
+          `;
+        }).join("");
+
+        document.getElementById("adminModList").innerHTML = state.stations.filter(s => !s.isFeatured).map(st => `
+          <div class="sub-tile rounded-xl p-3 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-semibold" style="color: var(--ink-primary);">${st.name}</div>
+              <div class="text-xs" style="color: var(--ink-muted);">Bởi ${st.owner} · ${st.hiddenByAdmin ? "Đang ẩn" : "Đang hiển thị"}</div>
+            </div>
+            <button type="button" data-mod-st="${st.id}" class="charcoal-pill cursor-pointer focus-ring rounded-full px-3 py-1 text-xs font-semibold">${st.hiddenByAdmin ? "Hiện lại" : "Ẩn"}</button>
+          </div>
+        `).join("");
+
+        document.querySelectorAll("[data-mod-st]").forEach(b => {
+          b.addEventListener("click", () => {
+            const st = state.stations.find(s => s.id === b.dataset.modSt);
+            if (st) st.hiddenByAdmin = !st.hiddenByAdmin;
+            renderAdmin(); renderDiscover(); renderRightBoard();
+          });
+        });
+      }
+
+      document.getElementById("adminProbeBtn").addEventListener("click", () => {
+        state.sources = state.sources.map(s => (
+          s.status === "DOWN"
+            ? { ...s, status: "DEGRADED", latency: 360 }
+            : { ...s, latency: Math.max(24, (s.latency || 100) + Math.floor(Math.random() * 28 - 14)) }
+        ));
+        renderAdmin();
+      });
+
+      function setZen(open) {
+        document.getElementById("zenOverlay").classList.toggle("hidden", !open);
+        if (open) drawAll();
+      }
+      document.getElementById("railZenBtn").addEventListener("click", () => setZen(true));
+      document.getElementById("spotlightZenBtn").addEventListener("click", () => setZen(true));
+      document.getElementById("zenCloseBtn").addEventListener("click", () => setZen(false));
+      document.addEventListener("keydown", e => { if (e.key === "Escape") setZen(false); });
+
+      let phase = 0;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      function drawBars(id, count, forceGold) {
+        const c = document.getElementById(id);
+        if (!c || c.offsetParent === null) return;
+        const dpr = window.devicePixelRatio || 1;
+        const r = c.getBoundingClientRect();
+        c.width = r.width * dpr;
+        c.height = r.height * dpr;
+        const ctx = c.getContext("2d");
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, r.width, r.height);
+        const step = r.width / count;
+        const light = state.theme === "light";
+        const baseColor = forceGold ? "#F5C428" : (light ? "#1E1F24" : "#F8FAFC");
+        const goldColor = "#F5C428";
+
+        for (let i = 0; i < count; i++) {
+          const amp = state.isPlaying
+            ? (Math.sin(phase + i * 0.42) * 0.5 + 0.5) * 0.72 + 0.18
+            : 0.22 + Math.abs(Math.sin(i * 0.65)) * 0.48;
+          const h = Math.max(4, amp * r.height * 0.85);
+          const x = i * step + step * 0.25;
+          const y = (r.height - h) / 2;
+          ctx.fillStyle = i < Math.floor(count * 0.42) ? goldColor : baseColor;
+          ctx.globalAlpha = i < Math.floor(count * 0.42) ? 0.95 : (state.isPlaying ? 0.85 : 0.35);
+          ctx.beginPath();
+          ctx.roundRect(x, y, Math.max(2, step * 0.45), h, 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawDashChart() {
+        const c = document.getElementById("dashChartCanvas");
+        if (!c || c.offsetParent === null) return;
+        const dpr = window.devicePixelRatio || 1;
+        const r = c.getBoundingClientRect();
+        c.width = r.width * dpr;
+        c.height = r.height * dpr;
+        const ctx = c.getContext("2d");
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, r.width, r.height);
+        const days = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+        const max = Math.max(...state.weekly, 70);
+        const slot = r.width / days.length;
+        const light = state.theme === "light";
+        ctx.font = "12px monospace";
+        ctx.textAlign = "center";
+
+        state.weekly.forEach((v, idx) => {
+          const h = (v / max) * (r.height - 24);
+          const x = idx * slot + slot * 0.28;
+          const y = r.height - 18 - h;
+          ctx.fillStyle = idx === 3 || idx === 6 ? "#F5C428" : (light ? "#1E1F24" : "#475569");
+          ctx.beginPath();
+          ctx.roundRect(x, y, slot * 0.44, h, 5);
+          ctx.fill();
+          ctx.fillStyle = light ? "#5C5F66" : "#A1A5B2";
+          ctx.fillText(days[idx], idx * slot + slot * 0.5, r.height - 4);
+        });
+      }
+
+      function drawAll() {
+        drawBars("stripWaveCanvas", 28, false);
+        drawBars("spotlightWaveCanvas", 36, true);
+        drawBars("zenWaveCanvas", 42, true);
+        drawBars("landingWaveCanvas", 22, false);
+        drawBars("landingStageCanvas", 40, true);
+        drawBars("loginWaveCanvas", 34, true);
+        drawDashChart();
+      }
+
+      function loop() {
+        if (!reduced.matches) {
+          if (state.isPlaying) phase += 0.09;
+          drawBars("stripWaveCanvas", 28, false);
+          drawBars("spotlightWaveCanvas", 36, true);
+          drawBars("zenWaveCanvas", 42, true);
+          drawBars("landingWaveCanvas", 22, false);
+          drawBars("landingStageCanvas", 40, true);
+          drawBars("loginWaveCanvas", 34, true);
+        }
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("themechange", () => {
+        applyTheme(document.documentElement.classList.contains("light") ? "light" : "dark");
+      });
+      window.addEventListener("resize", drawAll);
+
+      renderCategoryPills();
+      renderCalendar();
+      renderAmbientStack();
+      renderBottomEpisodes();
+      renderRightBoard();
+      renderDiscover();
+      renderUserDashboard();
+      renderAdmin();
+      renderTimerDisplay();
+      renderChrome();
+      applyTheme(state.theme);
+      setRole("GUEST");
+      navigate("landing"); // Start cleanly on Landing Page
+      loop();
+    })();
+  </script>
+</body>
+</html>

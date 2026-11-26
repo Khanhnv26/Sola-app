@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+/* Scoped Light (Warm Cream + White + Charcoal + Gold) & Dark (Graphite + Smoked Glass + Gold) tokens */
+[data-theme="light"] {
+  --shell-bg: #F4F1EA;
+  --card-bg: #FFFFFF;
+  --subcard-bg: #F8F6F1;
+  --glass-chrome: rgba(255, 255, 255, 0.78);
+  --glass-chrome-bot: rgba(255, 255, 255, 0.58);
+  --ink-primary: #1E1F24;
+  --ink-secondary: #5C5F66;
+  --ink-muted: #7C7F87;
+  --ink-on-dark: #FFFFFF;
+  --dark-pill: #1E1F24;
+  --gold-accent: #F5C428;
+  --gold-soft-bg: #FEF3C7;
+  --gold-text: #854D0E;
+  --border-soft: rgba(30, 31, 36, 0.08);
+  --glass-rim: rgba(255, 255, 255, 0.94);
+  --card-shadow: 0 4px 20px rgba(30, 31, 36, 0.04);
+  --orb-alpha: 0.22;
+}
+
+[data-theme="dark"] {
+  --shell-bg: #111217;
+  --card-bg: #1A1C23;
+  --subcard-bg: #22252E;
+  --glass-chrome: rgba(34, 37, 46, 0.76);
+  --glass-chrome-bot: rgba(24, 26, 34, 0.62);
+  --ink-primary: #F8FAFC;
+  --ink-secondary: #A1A5B2;
+  --ink-muted: #7C8190;
+  --ink-on-dark: #111217;
+  --dark-pill: #F8FAFC;
+  --gold-accent: #FACC15;
+  --gold-soft-bg: rgba(250, 204, 21, 0.16);
+  --gold-text: #FDE047;
+  --border-soft: rgba(255, 255, 255, 0.09);
+  --glass-rim: rgba(255, 255, 255, 0.20);
+  --card-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --orb-alpha: 0.18;
+}
+
+[data-theme] {
+  background-color: var(--shell-bg);
+  color: var(--ink-primary);
+  --status-ok: #10B981;
+  --status-warn: #EA580C;
+  --status-err: #F43F5E;
+  transition: background-color 260ms ease, color 260ms ease;
+}
+
+.app-shell {
+  background-color: transparent;
+  transition: background-color 260ms ease;
+}
+
+.bento-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--card-shadow);
+  transition: background-color 260ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.sub-tile {
+  background-color: var(--subcard-bg);
+  border: 1px solid var(--border-soft);
+  transition: background-color 260ms ease, border-color 200ms ease;
+}
+
+.liquid-chrome {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(155deg, var(--glass-chrome), var(--glass-chrome-bot));
+  border: 1px solid var(--glass-rim);
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.charcoal-pill {
+  background-color: var(--dark-pill);
+  color: var(--ink-on-dark);
+}
+
+.gold-pill {
+  background-color: var(--gold-accent);
+  color: #1A1B1F;
+}
+
+.tactile:active {
+  transform: scale(0.975);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--gold-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-chrome {
+    background: var(--card-bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-card,
+  .sub-tile,
+  .app-shell,
+  [data-theme] {
+    transition: none !important;
+  }
+}
